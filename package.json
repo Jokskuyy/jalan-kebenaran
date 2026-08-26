@@ -1,0 +1,30 @@
+{
+  "name": "jalan-kebenaran",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive 16-week roadmap for mastering agentic AI client solutions—not learning coding from scratch.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.2",
+    "typescript": "5.9.3",
+    "vite": "8.0.13",
+    "vitest": "4.0.18"
+  }
+}
