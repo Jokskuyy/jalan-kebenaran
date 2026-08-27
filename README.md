@@ -14,7 +14,7 @@ Every week follows the same delivery practice:
 
 `Learn → Inspect client evidence → Attempt solo → AI review → Revise → Pass gate → Ship`
 
-The AI is deliberately constrained to act as a coach and client simulator. It asks for the learner's draft first, asks no more than five discovery questions, scores a visible rubric, and returns a revision checklist instead of completing the final artifact.
+The AI is deliberately constrained to act as a tutor, coach, and client simulator. It teaches the week's concepts in Bahasa Indonesia with a case example and anti-pattern, checks understanding in the learner's own words, then asks for a draft. It asks no more than five discovery questions, scores a visible rubric, and returns a revision checklist instead of completing the final artifact.
 
 ## What this repository proves
 
