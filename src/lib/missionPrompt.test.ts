@@ -31,6 +31,9 @@ describe('buildMissionPrompt', () => {
       expect(first).toContain(week.gate);
       expect(first).toContain(week.mission.deliverable.title);
       expect(first).toContain('DO NOT COMPLETE THE WORK FOR ME');
+      expect(first).toContain('Teach before you test');
+      expect(first).toContain('CONCEPTS TO TEACH BEFORE MY ATTEMPT');
+      expect(first).toContain('case-and-concept readback');
       for (const heading of requiredHeadings) expect(first).toContain(heading);
     }
   });
@@ -44,10 +47,12 @@ describe('buildMissionPrompt', () => {
     expect(prompt).toContain('220 dokumen publik');
     expect(prompt).toContain('35 SOP');
     expect(prompt).toContain('15–90 menit');
-    expect(prompt).toContain('at most five high-impact questions');
+    expect(prompt).toContain('at most five high-impact discovery questions');
     expect(prompt).toContain('Do not rewrite the final artifact for me.');
     expect(prompt).toContain('/cases/regularag/interview-notes.md');
     expect(prompt).toContain('Problem before solution');
+    expect(prompt).toContain('workflow mapping');
+    expect(prompt).toContain('definisi sederhana, why it matters for this case');
   });
 
   it('uses an explicit preview origin without losing prompt purity', () => {

@@ -370,6 +370,16 @@ function App() {
                       {week.concepts.map((concept) => <span key={concept}>{concept}</span>)}
                     </div>
 
+                    <div className="mission-start">
+                      <span>START HERE · BELUM PERLU JAWABAN FINAL</span>
+                      <strong>AI akan mengajar dulu, lalu menguji pemahaman lo sebelum mereview draft.</strong>
+                      <p>
+                        Buka dossier <b>{week.mission.caseIds.map((caseId) => caseDossiers[caseId].title).join(' + ')}</b>,
+                        baca evidence, dan buat draft <b>{week.mission.deliverable.title}</b>. Yang nanti ditempel ke chat
+                        adalah draft artifact lo—bukan jawaban langsung ke client.
+                      </p>
+                    </div>
+
                     <WeeklyMissionDossier week={week} />
 
                     <div className="task-list" role="group" aria-label={`Tasks minggu ${week.week}`}>

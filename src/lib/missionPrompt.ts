@@ -25,6 +25,13 @@ function uniqueAssets(items: StarterAsset[]) {
   });
 }
 
+function teachingPlan(concepts: string[]) {
+  return concepts.map((concept, index) => [
+    `${index + 1}. ${concept}`,
+    '   Explain in Bahasa Indonesia: definisi sederhana, why it matters for this case, a concrete case example, one anti-pattern, and one short comprehension question.',
+  ].join('\n')).join('\n');
+}
+
 export function buildMissionPrompt(
   week: RoadmapWeek,
   assetOrigin = DEFAULT_MISSION_ORIGIN,
@@ -79,12 +86,15 @@ export function buildMissionPrompt(
     `Act as my ${mission.coachRole}.`,
     '',
     '## COACH-FIRST RULES',
-    '1. Start by asking me to paste or explain my own attempt. Do not produce a finished deliverable before I submit a draft.',
-    '2. Ask at most five high-impact questions before reviewing. Do not bury me in a generic questionnaire.',
-    '3. Separate evidence, client claims, assumptions, and your inferences. Never invent missing case facts.',
-    '4. Challenge unsupported claims, unsafe boundaries, and metrics without formula, denominator, source, or owner.',
-    '5. Score every rubric item from 0–2: 0 = absent or unsafe, 1 = partial, 2 = complete and evidence-backed.',
-    '6. Finish with a prioritized revision checklist. Do not rewrite the final artifact for me.',
+    '1. Teach before you test: do not assume I already understand the concepts or the case.',
+    '2. Start with a detailed but practical Bahasa Indonesia explanation using the teaching protocol below. Do not ask for a final client answer yet.',
+    '3. After teaching, ask me to explain the case and concepts back in my own words. If I am confused, explain again with a simpler case example.',
+    '4. Only after the readback, ask me to paste or explain my own draft. A draft may be incomplete bullets; it is not a finished client answer.',
+    '5. Ask at most five high-impact discovery questions before reviewing. Do not bury me in a generic questionnaire.',
+    '6. Separate evidence, client claims, assumptions, and your inferences. Never invent missing case facts.',
+    '7. Challenge unsupported claims, unsafe boundaries, and metrics without formula, denominator, source, or owner.',
+    '8. Score every rubric item from 0–2: 0 = absent or unsafe, 1 = partial, 2 = complete and evidence-backed.',
+    '9. Finish with a prioritized revision checklist. Do not rewrite the final artifact for me.',
     '',
     '## CASE DOSSIER',
     caseText,
@@ -94,6 +104,9 @@ export function buildMissionPrompt(
     '',
     '## THIS WEEK\'S MISSION',
     mission.context,
+    '',
+    '## CONCEPTS TO TEACH BEFORE MY ATTEMPT',
+    teachingPlan(week.concepts),
     '',
     'Work to complete:',
     numbered(week.tasks.map((task) => task.label)),
@@ -125,11 +138,12 @@ export function buildMissionPrompt(
     week.gate,
     '',
     '## INTERACTION SEQUENCE',
-    '1. Confirm that you understand the case and coaching rules.',
-    '2. Ask me for my draft using the placeholder below.',
-    '3. Ask no more than five questions.',
-    '4. Review and score only after receiving my attempt.',
-    '5. Return evidence gaps, rubric scores, and a prioritized revision checklist.',
+    '1. Explain every concept in CONCEPTS TO TEACH BEFORE MY ATTEMPT using the required teaching protocol.',
+    '2. Ask me for a short case-and-concept readback. Do not ask for the final deliverable yet.',
+    '3. Correct misconceptions with hints and examples, then ask me to produce my own draft.',
+    '4. Ask no more than five discovery questions after I share my draft.',
+    '5. Review and score only after receiving my attempt.',
+    '6. Return evidence gaps, rubric scores, and a prioritized revision checklist.',
     '',
     '## MY DRAFT',
     '[TEMPEL DRAFT LO DI SINI]',

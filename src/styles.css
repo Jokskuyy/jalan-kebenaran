@@ -145,6 +145,11 @@ a { color: inherit; }
 .client-outcome span, .week-card footer span { color: var(--slate); font: 600 9px/1.4 'IBM Plex Mono', monospace; letter-spacing: .12em; }
 .concept-list { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 26px 24px; }
 .concept-list span { padding: 6px 9px; background: #e3ece9; color: #365a5a; font: 500 10px/1 'IBM Plex Mono', monospace; }
+.mission-start { display: grid; gap: 8px; margin: 0 26px 18px; padding: 18px 20px; border-left: 5px solid var(--teal); background: #e8f2ef; }
+.mission-start > span { color: #087d72; font: 700 9px/1.3 'IBM Plex Mono', monospace; letter-spacing: .1em; }
+.mission-start strong { font: 650 18px/1.15 'Bricolage Grotesque', sans-serif; }
+.mission-start p { margin: 0; color: var(--slate); font-size: 13px; line-height: 1.45; }
+.mission-start b { color: var(--ink); }
 .mission-dossier { border-top: 1px solid var(--line); }
 .mission-dossier > summary { min-height: 68px; display: grid; grid-template-columns: 150px 1fr auto; align-items: center; gap: 18px; padding: 14px 26px; cursor: pointer; list-style: none; background: #f5f0df; }
 .mission-dossier > summary::-webkit-details-marker { display: none; }
@@ -173,6 +178,11 @@ a { color: inherit; }
 .week-card .mission-panel summary p { margin: 1px 0 6px; color: #087d72; font: 650 9px/1 'IBM Plex Mono', monospace; letter-spacing: .1em; }
 .mission-panel h4 { margin: 0; font: 650 20px/1.12 'Bricolage Grotesque', sans-serif; letter-spacing: -.025em; }
 .mission-panel__content { padding: 0 26px 26px; }
+.teach-first { margin-bottom: 18px; padding: 16px 18px; border-left: 4px solid var(--amber); background: #fff2d0; }
+.teach-first > strong { color: #765b13; font: 700 9px/1.3 'IBM Plex Mono', monospace; letter-spacing: .1em; }
+.teach-first p { margin: 8px 0 12px; color: #5b522f; font-size: 13px; line-height: 1.45; }
+.teach-first > div { display: flex; flex-wrap: wrap; gap: 7px; }
+.teach-first span { padding: 6px 8px; background: #ffe3a1; color: #765b13; font: 600 10px/1 'IBM Plex Mono', monospace; }
 .resource-list, .starter-file-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
 .resource-list a, .starter-file-list a { position: relative; min-height: 150px; display: flex; flex-direction: column; padding: 18px; background: white; text-decoration: none; }
 .resource-list a:hover, .starter-file-list a:hover { background: #edf5f2; }
@@ -370,6 +380,7 @@ a { color: inherit; }
   .week-meta { grid-column: 2; justify-items: start; }
   .client-outcome { grid-template-columns: 1fr; gap: 8px; padding: 20px; }
   .concept-list { padding-inline: 20px; }
+  .mission-start { margin-inline: 20px; }
   .mission-dossier > summary { grid-template-columns: 1fr auto; padding-inline: 20px; }
   .mission-dossier > summary span { grid-column: 1 / -1; }
   .mission-dossier > summary em { grid-column: 2; grid-row: 2; }
