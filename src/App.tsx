@@ -9,7 +9,11 @@ import {
   type PhaseId,
   type RoadmapWeek,
 } from './data/roadmap';
+import { WeeklyMissionDossier } from './components/WeeklyMissionDossier';
+import { caseDossiers } from './data/missions';
 import { useProgress } from './hooks/useProgress';
+import { copyText } from './lib/clipboard';
+import { buildMissionPrompt } from './lib/missionPrompt';
 
 const applicationCadence = [
   ['12–15', 'targeted applications'],
@@ -17,6 +21,30 @@ const applicationCadence = [
   ['02', 'mock interviews'],
   ['01', 'public build note'],
 ];
+
+const weeklyFlow = [
+  ['01', 'Learn'],
+  ['02', 'Inspect client evidence'],
+  ['03', 'Attempt solo'],
+  ['04', 'AI review'],
+  ['05', 'Revise'],
+  ['06', 'Pass gate'],
+  ['07', 'Ship'],
+];
+
+const timeBudget = [
+  ['10%', 'Learn', 'Materi just-in-time'],
+  ['10%', 'Inspect', 'Evidence + planning'],
+  ['55%', 'Build', 'Artifact atau system'],
+  ['15%', 'Evaluate', 'Failure test + red-team'],
+  ['10%', 'Ship', 'Docs + demo + evidence'],
+];
+
+type ManualPrompt = {
+  weekId: string;
+  weekNumber: number;
+  text: string;
+};
 
 function phaseForWeek(week: RoadmapWeek) {
   return phases.find((phase) => phase.id === week.phaseId) ?? phases[0];
@@ -35,6 +63,7 @@ function App() {
     reset,
   } = useProgress();
   const [copiedWeekId, setCopiedWeekId] = useState<string | null>(null);
+  const [manualPrompt, setManualPrompt] = useState<ManualPrompt | null>(null);
   const [liveMessage, setLiveMessage] = useState('');
 
   const completedTasks = useMemo(() => new Set(state.completedTaskIds), [state.completedTaskIds]);
@@ -46,6 +75,9 @@ function App() {
 
   const currentWeekData = roadmapWeeks[currentWeek - 1];
   const currentPhase = phaseForWeek(currentWeekData);
+  const currentCaseLabel = currentWeekData.mission.caseIds
+    .map((caseId) => caseDossiers[caseId].title)
+    .join(' + ');
   const nextOpenWeek = roadmapWeeks.find((week) => !completedGates.has(week.id));
   const nextOpenEvidence = evidenceItems.find((item) => !completedEvidence.has(item.id));
   const nextMilestone = nextOpenWeek
@@ -87,15 +119,20 @@ function App() {
     });
   }
 
-  async function copyAgentBrief(week: RoadmapWeek) {
-    try {
-      await navigator.clipboard.writeText(week.agentBrief);
+  async function copyMission(week: RoadmapWeek) {
+    const prompt = buildMissionPrompt(week, window.location.origin);
+    const result = await copyText(prompt);
+
+    if (result !== 'failed') {
       setCopiedWeekId(week.id);
-      setLiveMessage(`Agent brief minggu ${week.week} disalin.`);
+      setManualPrompt(null);
+      setLiveMessage(`Full mission minggu ${week.week} disalin ke clipboard.`);
       window.setTimeout(() => setCopiedWeekId(null), 1800);
-    } catch {
-      setLiveMessage('Browser menolak akses clipboard. Pilih dan salin brief secara manual.');
+      return;
     }
+
+    setManualPrompt({ weekId: week.id, weekNumber: week.week, text: prompt });
+    setLiveMessage(`Clipboard tidak tersedia. Full mission minggu ${week.week} ditampilkan untuk disalin manual.`);
   }
 
   function resetProgress() {
@@ -226,6 +263,41 @@ function App() {
           </div>
         </section>
 
+        <section className="weekly-system-section section-shell" aria-labelledby="weekly-system-title">
+          <div className="weekly-system-heading">
+            <p className="eyebrow">HOW TO RUN EVERY WEEK</p>
+            <h2 id="weekly-system-title">Jangan mulai dari prompt kosong.</h2>
+            <p>
+              Mulai dari evidence, kerjakan versi pertama sendiri, lalu gunakan AI sebagai coach dan
+              client simulator. Artifact final tetap hasil keputusan dan revisi lo.
+            </p>
+          </div>
+
+          <ol className="weekly-flow" aria-label="Alur latihan setiap minggu">
+            {weeklyFlow.map(([index, label]) => (
+              <li key={index}>
+                <span>{index}</span>
+                <strong>{label}</strong>
+              </li>
+            ))}
+          </ol>
+
+          <div className="time-budget" aria-label="Pembagian waktu mingguan">
+            {timeBudget.map(([value, label, note]) => (
+              <div key={label}>
+                <strong>{value}</strong>
+                <span>{label}</span>
+                <small>{note}</small>
+              </div>
+            ))}
+          </div>
+
+          <div className="coach-boundary">
+            <span>AI COACH BOUNDARY</span>
+            <p>AI boleh bertanya, mengkritik, menguji failure mode, dan memberi rubric score. AI tidak boleh mengerjakan final deliverable sebelum lo punya draft.</p>
+          </div>
+        </section>
+
         <section className="roadmap-section section-shell" id="roadmap">
           <aside className="roadmap-rail" aria-label="Current mission">
             <p className="eyebrow">CURRENT MISSION</p>
@@ -236,6 +308,7 @@ function App() {
               <p>{currentWeekData.clientOutcome}</p>
             </div>
             <dl>
+              <div><dt>ANCHOR CASE</dt><dd>{currentCaseLabel}</dd></div>
               <div><dt>TIMEBOX</dt><dd>{currentWeekData.hours}</dd></div>
               <div><dt>FILTER</dt><dd>{state.selectedPhase === 'all' ? 'All phases' : phaseForWeek(filteredWeeks[0]).label}</dd></div>
               <div><dt>VISIBLE</dt><dd>{filteredWeeks.length} of 16 weeks</dd></div>
@@ -297,6 +370,8 @@ function App() {
                       {week.concepts.map((concept) => <span key={concept}>{concept}</span>)}
                     </div>
 
+                    <WeeklyMissionDossier week={week} />
+
                     <div className="task-list" role="group" aria-label={`Tasks minggu ${week.week}`}>
                       {week.tasks.map((task) => (
                         <label key={task.id}>
@@ -322,8 +397,8 @@ function App() {
                     </footer>
 
                     <div className="week-actions">
-                      <button className="copy-button" type="button" onClick={() => copyAgentBrief(week)}>
-                        {copiedWeekId === week.id ? 'Brief disalin ✓' : 'Copy agent brief'}
+                      <button className="copy-button" type="button" onClick={() => copyMission(week)}>
+                        {copiedWeekId === week.id ? 'Full mission disalin ✓' : 'Copy full mission'}
                       </button>
                       <button
                         className={`gate-button${gateDone ? ' complete' : ''}`}
@@ -334,6 +409,22 @@ function App() {
                         {gateDone ? 'Gate passed ✓' : 'Tandai gate passed'}
                       </button>
                     </div>
+
+                    {manualPrompt?.weekId === week.id ? (
+                      <section className="manual-copy" aria-labelledby={`${week.id}-manual-copy`}>
+                        <div>
+                          <span>CLIPBOARD FALLBACK</span>
+                          <h4 id={`${week.id}-manual-copy`}>Salin full mission W{String(manualPrompt.weekNumber).padStart(2, '0')} secara manual.</h4>
+                          <button type="button" onClick={() => setManualPrompt(null)}>Tutup ×</button>
+                        </div>
+                        <textarea
+                          readOnly
+                          value={manualPrompt.text}
+                          onFocus={(event) => event.currentTarget.select()}
+                          aria-label={`Full mission minggu ${manualPrompt.weekNumber}`}
+                        />
+                      </section>
+                    ) : null}
                   </article>
                 );
               })}

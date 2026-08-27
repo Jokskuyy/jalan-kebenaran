@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  PROGRESS_KEY,
   PROGRESS_VERSION,
   calculateCompletion,
   calculateCurrentWeek,
@@ -27,6 +28,27 @@ describe('parseProgress', () => {
 
     expect(parsed.completedTaskIds).toEqual(['a', 'b']);
     expect(parsed.selectedPhase).toBe('discover');
+  });
+
+  it('keeps the v1 storage contract readable after mission content changes', () => {
+    const legacyV1 = JSON.stringify({
+      version: 1,
+      startDate: '2026-08-27',
+      completedTaskIds: ['w1-process-map'],
+      completedGateIds: ['week-1'],
+      completedEvidenceIds: ['evidence-repos'],
+      selectedPhase: 'all',
+    });
+
+    expect(PROGRESS_KEY).toBe('agent16-progress:v1');
+    expect(parseProgress(legacyV1)).toEqual({
+      version: 1,
+      startDate: '2026-08-27',
+      completedTaskIds: ['w1-process-map'],
+      completedGateIds: ['week-1'],
+      completedEvidenceIds: ['evidence-repos'],
+      selectedPhase: 'all',
+    });
   });
 });
 
@@ -66,4 +88,3 @@ describe('progress helpers', () => {
     expect(original).toEqual(['a']);
   });
 });
-

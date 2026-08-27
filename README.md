@@ -8,7 +8,13 @@
 
 ![AGENT/16 social preview](public/og.png)
 
-AGENT/16 is an interactive 16-week operating system for an informatics graduate targeting AI Engineer, AI Application Engineer, Agentic AI Developer, or AI Automation roles. It prioritizes the work clients actually need: discovery, architecture, integration, evaluation, reliability, safety, and measurable business outcomes. Python, FastAPI, SQL, Docker, and CI are treated as supporting delivery skills—not the destination.
+AGENT/16 is an interactive, mission-based 16-week operating system for an informatics graduate targeting AI Engineer, AI Application Engineer, Agentic AI Developer, or AI Automation roles. It prioritizes the work clients actually need: discovery, architecture, integration, evaluation, reliability, safety, and measurable business outcomes. Python, FastAPI, SQL, Docker, and CI are treated as supporting delivery skills—not the destination.
+
+Every week follows the same delivery practice:
+
+`Learn → Inspect client evidence → Attempt solo → AI review → Revise → Pass gate → Ship`
+
+The AI is deliberately constrained to act as a coach and client simulator. It asks for the learner's draft first, asks no more than five discovery questions, scores a visible rubric, and returns a revision checklist instead of completing the final artifact.
 
 ## What this repository proves
 
@@ -22,7 +28,8 @@ AGENT/16 is an interactive 16-week operating system for an informatics graduate 
 
 - Mission Control with start date, automatically calculated current week, progress, and next milestone.
 - Clickable delivery loop: `Discover → Design → Orchestrate → Evaluate → Operate → Prove`.
-- Sixteen execution weeks with tasks, evidence, quality gates, and copyable agent briefs.
+- Sixteen execution weeks with official learning resources, synthetic client evidence, downloadable starter files, deliverable specifications, visible rubrics, and quality gates.
+- A deterministic **Copy full mission** prompt that includes the case, evidence, constraints, files, output format, rubric, and coach-first protocol—ready for a new AI chat.
 - Filter-aware skill map that separates core capabilities from supporting engineering.
 - Two scoped portfolio labs: **RegulaRAG ID** and **InvoiceOps Agent**.
 - Job-ready evidence checklist, role radar, and weekly application cadence.
@@ -39,7 +46,21 @@ AGENT/16 is an interactive 16-week operating system for an informatics graduate 
 | 9–13 | InvoiceOps Agent and operations | Typed integrations, approval queue, failure report, scorecard |
 | 14–16 | Case studies, communication, interviews, applications | Two polished cases and a measurable job-search loop |
 
-The typed source of truth lives in [`src/data/roadmap.ts`](src/data/roadmap.ts).
+Weeks 1–8 use **RegulaRAG ID** as one continuous anchor case. Weeks 9–13 use **InvoiceOps Agent**. Weeks 14–16 turn evidence from both projects into English case studies, interview defenses, and a measurable application sprint.
+
+The typed source of truth lives in [`src/data/roadmap.ts`](src/data/roadmap.ts) and [`src/data/missions.ts`](src/data/missions.ts). The downloadable training dossiers live under [`public/cases`](public/cases/README.md).
+
+## Weekly time budget
+
+| Share | Activity | Output |
+| ---: | --- | --- |
+| 10% | Just-in-time learning | Only the concepts needed for this mission |
+| 10% | Client evidence and planning | Assumptions, questions, and an attack plan |
+| 55% | Build | A working artifact or system increment |
+| 15% | Evaluate and red-team | Failure evidence and revision decisions |
+| 10% | Ship | Documentation, demo, and career evidence |
+
+Coaching and explanation are in Bahasa Indonesia. Schemas, ADRs, READMEs, evaluation reports, and primary case studies use working English.
 
 ## Local development
 
@@ -60,7 +81,7 @@ pnpm test
 pnpm build
 ```
 
-The GitHub Actions workflow runs the same checks on every push and pull request. Roadmap structure and progress parsing are covered by unit tests.
+The GitHub Actions workflow runs the same checks on every push and pull request. Tests validate all 16 case assignments, resource limits, prompt completeness and determinism, the W01 coach-first contract, starter-file existence, roadmap structure, and legacy progress parsing.
 
 ## Deployment
 
@@ -77,7 +98,7 @@ No deployment secret is stored in GitHub.
 
 Progress is stored only in the visitor's browser under `agent16-progress:v1`. There is no account, backend, database, analytics payload, or client data. Resetting progress asks for confirmation.
 
-The portfolio project specifications use public or synthetic data. Any benchmark or ROI claim produced while following this roadmap must be labeled as a simulation unless it comes from an authorized real-world engagement.
+The portfolio project specifications and downloadable starter packs use public or synthetic data. They contain no real client, vendor, invoice, PO, employee, or confidential business data. Any benchmark or ROI claim produced while following this roadmap must be labeled as a simulation unless it comes from an authorized real-world engagement.
 
 ## License
 

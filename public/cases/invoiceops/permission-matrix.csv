@@ -1,0 +1,12 @@
+capability,ap_analyst,finance_controller,procurement,warehouse,system_agent,service_account,required_control,data_classification
+read_invoice,allow,allow,deny,deny,allow,allow,"case-scoped authorization",synthetic
+read_vendor,allow,allow,allow,deny,allow,allow,"approved vendor fields only",synthetic
+read_purchase_order,allow,allow,allow,allow,allow,allow,"case-scoped authorization",synthetic
+read_goods_receipt,allow,allow,allow,allow,allow,allow,"case-scoped authorization",synthetic
+propose_extraction,allow,allow,deny,deny,allow,allow,"confidence and source regions recorded",synthetic
+calculate_totals,allow,allow,deny,deny,deny,allow,"deterministic tested rule only",synthetic
+propose_route,allow,allow,deny,deny,allow,allow,"rule evidence and exception code required",synthetic
+edit_case,allow,allow,deny,deny,deny,allow,"authenticated actor and version check",synthetic
+approve_payment_ready,deny,allow,deny,deny,deny,deny,"fresh human approval bound to case version",synthetic
+write_reconciliation_result,deny,deny,deny,deny,deny,allow,"approval token plus idempotency key",synthetic
+execute_payment,deny,deny,deny,deny,deny,deny,"out of scope in every environment",synthetic

@@ -1,0 +1,13 @@
+ticket_id,received_at,requester_role,topic,question_completeness,documents_opened,research_minutes,review_minutes,total_minutes,source_captured,escalated,reopened,outcome,notes,data_classification
+RQ-001,2026-01-06T09:15:00+07:00,Operations,retention exception,partial,6,42,18,60,true,true,false,answered,conflicting SOP versions found,synthetic
+RQ-002,2026-01-06T13:40:00+07:00,Procurement,vendor due diligence,complete,3,18,0,18,true,false,false,answered,current SOP found quickly,synthetic
+RQ-003,2026-01-07T10:05:00+07:00,Customer Support,data access request,partial,7,55,20,75,true,true,true,answered,requester clarified scope after first answer,synthetic
+RQ-004,2026-01-08T08:50:00+07:00,Security,incident reporting,complete,4,24,12,36,true,true,false,answered,legal review requested,synthetic
+RQ-005,2026-01-08T15:10:00+07:00,Sales,customer data location,low,8,68,22,90,false,true,true,unresolved,no authoritative internal source found,synthetic
+RQ-006,2026-01-09T11:20:00+07:00,Operations,case-log retention,complete,2,15,0,15,true,false,false,answered,answered from active SOP,synthetic
+RQ-007,2026-01-12T09:35:00+07:00,Product,new analytics purpose,partial,9,61,16,77,true,true,false,answered,question required scope boundary,synthetic
+RQ-008,2026-01-12T14:25:00+07:00,Procurement,annual vendor review,complete,3,21,0,21,false,false,true,answered,source omitted from first response,synthetic
+RQ-009,2026-01-13T10:45:00+07:00,Customer Support,identity verification,low,5,39,14,53,true,true,false,answered,request mixed two request types,synthetic
+RQ-010,2026-01-14T16:05:00+07:00,Security,public incident statement,complete,4,28,19,47,true,true,false,answered,communications approval also required,synthetic
+RQ-011,2026-01-15T09:00:00+07:00,Finance,retention of payment evidence,partial,7,51,17,68,false,true,true,unresolved,payment data boundary unclear,synthetic
+RQ-012,2026-01-15T13:30:00+07:00,Operations,SOP owner,complete,2,17,0,17,true,false,false,answered,metadata owner field used,synthetic
