@@ -34,6 +34,7 @@ describe('buildMissionPrompt', () => {
       expect(first).toContain('Teach before you test');
       expect(first).toContain('CONCEPTS TO TEACH BEFORE MY ATTEMPT');
       expect(first).toContain('case-and-concept readback');
+      expect(first).not.toContain('Explain the concept in Bahasa Indonesia with a definition');
       for (const heading of requiredHeadings) expect(first).toContain(heading);
     }
   });
@@ -52,7 +53,9 @@ describe('buildMissionPrompt', () => {
     expect(prompt).toContain('/cases/regularag/interview-notes.md');
     expect(prompt).toContain('Problem before solution');
     expect(prompt).toContain('workflow mapping');
-    expect(prompt).toContain('definisi sederhana, why it matters for this case');
+    expect(prompt).toContain('Definition: Peta urutan kerja');
+    expect(prompt).toContain('Case example: Untuk RegulaRAG');
+    expect(prompt).toContain('Common trap: Menggambar fitur aplikasi');
   });
 
   it('uses an explicit preview origin without losing prompt purity', () => {

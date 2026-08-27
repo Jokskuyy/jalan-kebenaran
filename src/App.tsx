@@ -376,7 +376,7 @@ function App() {
                       <p>
                         Buka dossier <b>{week.mission.caseIds.map((caseId) => caseDossiers[caseId].title).join(' + ')}</b>,
                         baca evidence, dan buat draft <b>{week.mission.deliverable.title}</b>. Yang nanti ditempel ke chat
-                        adalah draft artifact lo—bukan jawaban langsung ke client.
+                        adalah draft artifact lo—bukan jawaban langsung ke client. Lesson detail konsep juga ikut terbawa saat klik <b>Copy full mission</b>.
                       </p>
                     </div>
 
