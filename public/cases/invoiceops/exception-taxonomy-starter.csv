@@ -1,0 +1,12 @@
+exception_code,label,detection_signal,default_owner,allowed_system_action,terminal_state,sla_hours,data_classification
+EX-DUP,probable_duplicate,"duplicate score above threshold",ap_analyst,"hold and present matching evidence",duplicate_confirmed_or_released,4,synthetic
+EX-PO,missing_or_invalid_po,"PO absent or lookup fails",ap_analyst,"request valid PO reference",resolved_or_rejected,8,synthetic
+EX-QTY,quantity_mismatch,"invoice quantity exceeds received quantity",warehouse,"route with line-level delta",resolved_or_rejected,12,synthetic
+EX-PRICE,price_mismatch,"unit price outside documented tolerance",procurement,"route with deterministic variance",resolved_or_rejected,12,synthetic
+EX-TAX,tax_mismatch,"tax code or amount fails rule",finance_controller,"route with deterministic tax evidence",resolved_or_rejected,8,synthetic
+EX-FX,currency_mismatch,"invoice and PO currencies differ",ap_analyst,"hold and request evidence",resolved_or_rejected,8,synthetic
+EX-OCR,low_extraction_confidence,"required field below confidence threshold",ap_analyst,"pause for field correction",corrected_or_rejected,4,synthetic
+EX-VENDOR,vendor_master_mismatch,"vendor absent inactive or inconsistent",procurement,"hold and request master-data review",resolved_or_rejected,12,synthetic
+EX-RECEIPT,missing_goods_receipt,"PO exists but receipt is missing",warehouse,"route with PO and invoice evidence",resolved_or_rejected,12,synthetic
+EX-AUTH,unauthorized_action,"actor or token lacks permission",security,"block write and create audit event",blocked,0,synthetic
+EX-SEC,adversarial_content,"instruction-like text appears in invoice",security,"treat as data and route for review",quarantined_or_released,4,synthetic

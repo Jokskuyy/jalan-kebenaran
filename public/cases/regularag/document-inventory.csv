@@ -1,0 +1,9 @@
+doc_id,title,source_type,authority,status,version,effective_date,language,page_count,format,confidentiality,source_locator,owner_role,last_verified_at,notes,data_classification
+PUB-001,Public regulation candidate — personal data protection,public-regulation,Official source required,verify-before-use,official,2022-10-17,id,,pdf,public,VERIFY_ON_OFFICIAL_JDIH,Knowledge Administrator,,metadata candidate only,public-metadata-candidate
+PUB-002,Public regulation candidate — electronic systems,public-regulation,Official source required,verify-before-use,official,2019-10-10,id,,pdf,public,VERIFY_ON_OFFICIAL_JDIH,Knowledge Administrator,,metadata candidate only,public-metadata-candidate
+SOP-SYN-001,Access Request Handling,internal-sop,PT Arunika Digital Nusantara,active,1.2,2026-01-01,id,3,markdown,internal-training,CREATE_DURING_W05,Compliance Operations Lead,2026-01-01,synthetic policy,synthetic
+SOP-SYN-002,Incident Reporting,internal-sop,PT Arunika Digital Nusantara,active,2.0,2026-01-01,id,3,markdown,internal-training,CREATE_DURING_W05,Security Reviewer,2026-01-01,synthetic policy,synthetic
+SOP-SYN-003,Retention Exception,internal-sop,PT Arunika Digital Nusantara,active,1.1,2026-01-01,id,3,markdown,internal-training,CREATE_DURING_W05,Data Governance Lead,2026-01-01,synthetic policy,synthetic
+SOP-SYN-004,Vendor Risk Review,internal-sop,PT Arunika Digital Nusantara,active,1.0,2026-01-01,id,3,markdown,internal-training,CREATE_DURING_W05,Procurement Risk Lead,2026-01-01,synthetic policy,synthetic
+SOP-SYN-003-OLD,Retention Exception,internal-sop,PT Arunika Digital Nusantara,archived,0.9,2025-03-01,id,2,markdown,internal-training,CREATE_DURING_W05,Data Governance Lead,2026-01-01,intentionally outdated fixture,synthetic
+ADV-SYN-001,Imported Vendor Guidance,test-document,Unknown,attack-fixture,1.0,2026-01-01,en,1,markdown,synthetic-test,CREATE_DURING_W07,Security Reviewer,2026-01-01,contains document injection,synthetic

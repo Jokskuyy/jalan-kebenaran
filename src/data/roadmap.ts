@@ -1,3 +1,5 @@
+import { weeklyMissions, type WeeklyMission } from './missions';
+
 export type PhaseId =
   | 'discover'
   | 'design'
@@ -22,7 +24,7 @@ export type RoadmapWeek = {
   evidence: string;
   gate: string;
   hours: string;
-  agentBrief: string;
+  mission: WeeklyMission;
 };
 
 export type DeliveryPhase = {
@@ -54,7 +56,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'One-page problem brief + process map.',
     gate: 'Masalah dapat dijelaskan tanpa menyebut framework AI.',
     hours: '28–34 jam',
-    agentBrief: 'Bertindak sebagai solution architect. Kritik problem brief ini: cari asumsi tersembunyi, KPI yang tidak terukur, dan langkah proses yang belum memiliki owner.',
+    mission: weeklyMissions[1],
   },
   {
     id: 'week-2', week: 2, phaseId: 'discover', title: 'Run the agent-fit test',
@@ -68,7 +70,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'Agent-fit assessment dengan alasan teknis dan bisnis.',
     gate: 'Bisa menjelaskan kapan tidak memakai LLM.',
     hours: '28–34 jam',
-    agentBrief: 'Evaluasi empat opsi solusi untuk workflow ini: deterministic rules, automation, RAG assistant, dan tool-using agent. Beri trade-off reliability, cost, latency, dan risk.',
+    mission: weeklyMissions[2],
   },
   {
     id: 'week-3', week: 3, phaseId: 'design', title: 'Contract before prompt',
@@ -82,7 +84,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'Tool contract + executable contract tests.',
     gate: 'Output invalid selalu gagal dengan jelas, tidak diteruskan diam-diam.',
     hours: '30–36 jam',
-    agentBrief: 'Review tool schema ini seperti API reviewer. Cari ambiguity, missing error states, unsafe defaults, dan field yang tidak bisa diaudit.',
+    mission: weeklyMissions[3],
   },
   {
     id: 'week-4', week: 4, phaseId: 'design', title: 'Design the control plane',
@@ -96,7 +98,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'Architecture decision record + failure matrix.',
     gate: 'Setiap side effect memiliki permission dan audit path.',
     hours: '30–36 jam',
-    agentBrief: 'Red-team rancangan agent ini. Fokus pada infinite loop, duplicate action, tool timeout, excessive agency, dan approval bypass.',
+    mission: weeklyMissions[4],
   },
   {
     id: 'week-5', week: 5, phaseId: 'orchestrate', title: 'Build the RAG baseline',
@@ -110,7 +112,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'RegulaRAG baseline + versioned evaluation set.',
     gate: 'Setiap chunk dapat ditelusuri kembali ke dokumen dan halaman.',
     hours: '32–38 jam',
-    agentBrief: 'Audit strategi ingestion dan chunking ini. Cari metadata yang hilang, risiko duplikasi, konteks yang terpotong, dan dokumen yang sulit diekstrak.',
+    mission: weeklyMissions[5],
   },
   {
     id: 'week-6', week: 6, phaseId: 'evaluate', title: 'Make retrieval measurable',
@@ -124,7 +126,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'Baseline-versus-final evaluation report.',
     gate: 'Recall@5 ≥80% dan citation precision ≥90% pada demo set.',
     hours: '32–38 jam',
-    agentBrief: 'Bertindak sebagai evaluator RAG. Periksa apakah dataset, baseline, metric, dan sampling manual cukup untuk mendukung klaim kualitas.',
+    mission: weeklyMissions[6],
   },
   {
     id: 'week-7', week: 7, phaseId: 'operate', title: 'Defend the knowledge boundary',
@@ -138,7 +140,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'Threat model + adversarial regression suite.',
     gate: '≥90% unsupported questions ditolak dan document injection tidak mengubah policy.',
     hours: '30–36 jam',
-    agentBrief: 'Red-team knowledge assistant ini dengan prompt injection, conflicting policies, missing evidence, dan attempts untuk mengekstrak data di luar corpus.',
+    mission: weeklyMissions[7],
   },
   {
     id: 'week-8', week: 8, phaseId: 'prove', title: 'Ship RegulaRAG evidence',
@@ -152,7 +154,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'Live demo + eval dashboard + first client case study.',
     gate: 'Fresh clone dapat menjalankan demo dan seluruh regression eval.',
     hours: '32–40 jam',
-    agentBrief: 'Review case study ini sebagai calon client. Tandai klaim tanpa bukti, limitation yang disembunyikan, dan metric yang tidak terhubung ke user outcome.',
+    mission: weeklyMissions[8],
   },
   {
     id: 'week-9', week: 9, phaseId: 'discover', title: 'Map the invoice exception flow',
@@ -166,7 +168,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'InvoiceOps process map + exception taxonomy.',
     gate: 'Setiap exception memiliki owner dan terminal state.',
     hours: '28–34 jam',
-    agentBrief: 'Kritik invoice exception taxonomy ini. Cari overlap, missing terminal states, dan keputusan finansial yang tidak boleh dilakukan model.',
+    mission: weeklyMissions[9],
   },
   {
     id: 'week-10', week: 10, phaseId: 'orchestrate', title: 'Connect tools, preserve rules',
@@ -180,7 +182,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'Contract-tested tools + deterministic reconciliation engine.',
     gate: 'LLM tidak menghitung atau memutuskan pembayaran.',
     hours: '34–40 jam',
-    agentBrief: 'Review tool boundaries ini. Temukan business logic yang masih bocor ke prompt dan side effect yang belum memiliki idempotency key.',
+    mission: weeklyMissions[10],
   },
   {
     id: 'week-11', week: 11, phaseId: 'orchestrate', title: 'Persist state, require approval',
@@ -194,7 +196,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'Resumable workflow + reviewer queue.',
     gate: '100% risky scenarios berhenti pada approval.',
     hours: '34–40 jam',
-    agentBrief: 'Threat-model approval flow ini. Cari race condition, stale approval, privilege escalation, dan cara agent dapat menulis tanpa reviewer.',
+    mission: weeklyMissions[11],
   },
   {
     id: 'week-12', week: 12, phaseId: 'operate', title: 'Engineer for ugly failures',
@@ -208,7 +210,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'Failure-injection report + recovery runbook.',
     gate: 'Zero duplicate side effect dan tiga injected failures pulih dengan benar.',
     hours: '34–40 jam',
-    agentBrief: 'Rancang chaos test untuk workflow ini. Prioritaskan duplicate delivery, partial failure, retry storm, expired credential, dan unavailable dependency.',
+    mission: weeklyMissions[12],
   },
   {
     id: 'week-13', week: 13, phaseId: 'evaluate', title: 'Measure the operating outcome',
@@ -222,7 +224,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'InvoiceOps scorecard + simulated ROI model.',
     gate: 'Routing ≥90%, key fields ≥95%, low-confidence selalu dieskalasi.',
     hours: '32–38 jam',
-    agentBrief: 'Audit scorecard ini. Cari leakage pada test data, metric yang mudah dimanipulasi, dan klaim ROI yang tidak punya baseline yang adil.',
+    mission: weeklyMissions[13],
   },
   {
     id: 'week-14', week: 14, phaseId: 'prove', title: 'Package the client story',
@@ -236,7 +238,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'Two polished repos + two concise client case studies.',
     gate: 'Semua klaim kualitas memiliki metric, dataset, dan limitation.',
     hours: '30–36 jam',
-    agentBrief: 'Edit case study ini untuk recruiter global. Pertahankan bukti teknis, hilangkan jargon kosong, dan buat trade-off serta business outcome cepat ditemukan.',
+    mission: weeklyMissions[14],
   },
   {
     id: 'week-15', week: 15, phaseId: 'prove', title: 'Defend every decision',
@@ -250,7 +252,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'Interview packet + recorded English walkthrough.',
     gate: 'Bisa menjelaskan agent vs workflow, evaluation, safety, cost, dan rollback.',
     hours: '28–34 jam',
-    agentBrief: 'Interview saya tentang proyek ini. Dorong sampai level failure modes, data boundaries, evaluation design, operational cost, dan keputusan yang akan saya ubah.',
+    mission: weeklyMissions[15],
   },
   {
     id: 'week-16', week: 16, phaseId: 'prove', title: 'Run the application system',
@@ -264,7 +266,7 @@ export const roadmapWeeks: RoadmapWeek[] = [
     evidence: 'Application dashboard + next-30-day improvement backlog.',
     gate: 'Setiap kegagalan funnel menghasilkan perubahan positioning atau skill yang spesifik.',
     hours: '28–34 jam',
-    agentBrief: 'Analisis funnel lamaran ini. Bedakan masalah targeting, CV positioning, portfolio evidence, technical interview, dan storytelling; lalu prioritaskan eksperimen dua minggu berikutnya.',
+    mission: weeklyMissions[16],
   },
 ];
 
@@ -343,7 +345,7 @@ export const projectLabs: ProjectLab[] = [
     constraint: 'Semua jawaban faktual wajib memiliki bukti; dokumen diperlakukan sebagai untrusted input.',
     metrics: ['Recall@5 ≥80%', 'citation precision ≥90%', 'abstention ≥90%'],
     acceptance: ['No duplicate chunks', 'Page-level citation', 'Injection regression suite'],
-    weeks: 'W05—W08',
+    weeks: 'W01—W08',
   },
   {
     id: 'invoiceops', label: 'PROJECT LAB B · OPERATIONAL AGENT', title: 'InvoiceOps Agent',

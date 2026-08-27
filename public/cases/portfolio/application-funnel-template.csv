@@ -1,0 +1,2 @@
+application_id,date,company,role_title,role_cluster,job_description_signal,evidence_link,contact_or_channel,stage,outcome_signal,next_experiment,follow_up_date,data_classification
+APP-001,YYYY-MM-DD,Example Company,AI Solutions Engineer,client_solution_delivery,"RAG evaluation and stakeholder discovery",https://example.invalid/case-study,direct_application,targeted,replace_with_real_signal,"Tailor first portfolio link to the strongest requirement",YYYY-MM-DD,synthetic

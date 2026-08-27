@@ -1,0 +1,27 @@
+{
+  "training_data": "synthetic template",
+  "tools": [
+    {
+      "name": "search_corpus",
+      "description": "Search active allowed documents and return ranked source spans.",
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["query", "allowed_collections", "top_k"],
+        "properties": {
+          "query": { "type": "string", "minLength": 3 },
+          "allowed_collections": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "top_k": { "type": "integer", "minimum": 1, "maximum": 20 }
+        }
+      },
+      "success_output_todo": "Define ranked spans with document_id, version, page, section_id, score, and trace_id.",
+      "error_union_todo": ["NO_EVIDENCE", "INVALID_FILTER", "TIMEOUT", "DEPENDENCY_UNAVAILABLE"]
+    },
+    {
+      "name": "fetch_source_span",
+      "description": "Fetch one auditable source span by stable identifiers.",
+      "input_schema_todo": "Define document_id, version, page, and section_id.",
+      "output_schema_todo": "Define exact text, source metadata, checksum, and trace_id."
+    }
+  ]
+}
