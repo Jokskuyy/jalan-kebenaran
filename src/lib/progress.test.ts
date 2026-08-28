@@ -73,12 +73,25 @@ describe('progress helpers', () => {
       ...initialProgress,
       completedTaskIds: ['a', 'b'],
       completedGateIds: ['g'],
-    }, { tasks: 4, gates: 2, evidence: 2 })).toBe(38);
+    }, { tasks: ['a', 'b', 'c', 'd'], gates: ['g', 'h'], evidence: ['e1', 'e2'] })).toBe(38);
 
     expect(calculateCompletion({
       ...initialProgress,
       completedTaskIds: ['a', 'b', 'c'],
-    }, { tasks: 1, gates: 0, evidence: 0 })).toBe(100);
+    }, { tasks: ['a'], gates: [], evidence: [] })).toBe(100);
+  });
+
+  it('ignores unknown identifiers instead of inflating completion', () => {
+    expect(calculateCompletion({
+      ...initialProgress,
+      completedTaskIds: ['known-task', 'fabricated-task'],
+      completedGateIds: ['fabricated-gate'],
+      completedEvidenceIds: ['fabricated-evidence'],
+    }, {
+      tasks: ['known-task', 'remaining-task'],
+      gates: ['known-gate'],
+      evidence: ['known-evidence'],
+    })).toBe(25);
   });
 
   it('toggles an identifier without mutating the input', () => {

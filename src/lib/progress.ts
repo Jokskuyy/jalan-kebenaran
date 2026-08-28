@@ -88,15 +88,18 @@ export function calculateCurrentWeek(startDate: string, now = new Date()) {
 
 export function calculateCompletion(
   state: ProgressState,
-  totals: { tasks: number; gates: number; evidence: number },
+  knownIds: { tasks: readonly string[]; gates: readonly string[]; evidence: readonly string[] },
 ) {
-  const total = totals.tasks + totals.gates + totals.evidence;
+  const total = knownIds.tasks.length + knownIds.gates.length + knownIds.evidence.length;
   if (total === 0) return 0;
 
+  const completedTasks = new Set(state.completedTaskIds);
+  const completedGates = new Set(state.completedGateIds);
+  const completedEvidence = new Set(state.completedEvidenceIds);
   const completed =
-    state.completedTaskIds.length +
-    state.completedGateIds.length +
-    state.completedEvidenceIds.length;
+    knownIds.tasks.filter((id) => completedTasks.has(id)).length +
+    knownIds.gates.filter((id) => completedGates.has(id)).length +
+    knownIds.evidence.filter((id) => completedEvidence.has(id)).length;
 
   return Math.min(100, Math.round((completed / total) * 100));
 }

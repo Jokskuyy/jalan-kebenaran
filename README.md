@@ -31,6 +31,8 @@ The AI is deliberately constrained to act as a tutor, coach, and client simulato
 - Sixteen story-first missions that place the learner in a client scene, wait for a decision, reveal the concept through feedback, and only then move toward the weekly deliverable.
 - Collapsible Mission Kits with official learning resources, synthetic client evidence, downloadable starter files, deliverable specifications, visible rubrics, and quality gates.
 - A deterministic **Copy full mission** prompt that includes the case, evidence, constraints, files, output format, rubric, and coach-first protocol—ready for a new AI chat.
+- A structured **Mission Debrief** receipt for every week: paste the AI review, validate it against that week's rubric, inspect or edit the preview, then save it locally.
+- A deterministic **Final After-Action Report** that unlocks after 48 tasks, 16 gates, and 16 debriefs, with nine capability scores, a 16-week mission trace, safety floor, strengths, priority improvements, and Markdown export.
 - Filter-aware skill map that separates core capabilities from supporting engineering.
 - Two scoped portfolio labs: **RegulaRAG ID** and **InvoiceOps Agent**.
 - Job-ready evidence checklist, role radar, and weekly application cadence.
@@ -82,7 +84,7 @@ pnpm test
 pnpm build
 ```
 
-The GitHub Actions workflow runs the same checks on every push and pull request. Tests validate all 16 case assignments, story-beat order, resource limits, prompt completeness and determinism, the W01 story-first contract, starter-file existence, roadmap structure, and legacy progress parsing.
+The GitHub Actions workflow runs the same checks on every push and pull request. Tests validate all 16 case assignments, story-beat order, resource limits, prompt completeness and determinism, assessment markers and rubric identities, strict paste validation, corrupted-storage recovery, equal weekly weighting, the 80/20 readiness formula, nine capability mappings, safety-floor behavior, final-report unlock rules, starter-file existence, roadmap structure, and legacy progress parsing.
 
 ## Deployment
 
@@ -97,7 +99,7 @@ No deployment secret is stored in GitHub.
 
 ## Privacy and data
 
-Progress is stored only in the visitor's browser under `agent16-progress:v1`. There is no account, backend, database, analytics payload, or client data. Resetting progress asks for confirmation.
+Progress is stored only in the visitor's browser under `agent16-progress:v1`; Mission Debriefs are stored separately under `agent16-assessments:v1`. There is no account, backend, database, analytics payload, or client data. Re-importing a debrief and resetting all local records both ask for confirmation. The readiness conclusion is derived locally from the latest saved state and is never treated as a certification or guarantee of employability.
 
 The portfolio project specifications and downloadable starter packs use public or synthetic data. They contain no real client, vendor, invoice, PO, employee, or confidential business data. Any benchmark or ROI claim produced while following this roadmap must be labeled as a simulation unless it comes from an authorized real-world engagement.
 

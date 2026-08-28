@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { evidenceItems, roadmapWeeks } from '../data/roadmap';
 import {
   PROGRESS_KEY,
@@ -21,10 +21,21 @@ function loadProgress() {
   }
 }
 
+const knownProgressIds = {
+  tasks: roadmapWeeks.flatMap((week) => week.tasks.map((task) => task.id)),
+  gates: roadmapWeeks.map((week) => week.id),
+  evidence: evidenceItems.map((item) => item.id),
+} as const;
+
 export function useProgress() {
   const [state, setState] = useState<ProgressState>(loadProgress);
+  const skipNextPersist = useRef(false);
 
   useEffect(() => {
+    if (skipNextPersist.current) {
+      skipNextPersist.current = false;
+      return;
+    }
     try {
       window.localStorage.setItem(PROGRESS_KEY, serializeProgress(state));
     } catch {
@@ -61,15 +72,22 @@ export function useProgress() {
     }));
   }, []);
 
-  const reset = useCallback(() => setState(initialProgress), []);
+  const reset = useCallback(() => {
+    skipNextPersist.current = true;
+    try {
+      window.localStorage.removeItem(PROGRESS_KEY);
+    } catch {
+      // State still resets in-memory when browser storage is unavailable.
+    }
+    setState({
+      ...initialProgress,
+      completedTaskIds: [],
+      completedGateIds: [],
+      completedEvidenceIds: [],
+    });
+  }, []);
 
-  const totals = useMemo(() => ({
-    tasks: roadmapWeeks.reduce((total, week) => total + week.tasks.length, 0),
-    gates: roadmapWeeks.length,
-    evidence: evidenceItems.length,
-  }), []);
-
-  const progress = calculateCompletion(state, totals);
+  const progress = calculateCompletion(state, knownProgressIds);
   const currentWeek = calculateCurrentWeek(state.startDate);
 
   return {
