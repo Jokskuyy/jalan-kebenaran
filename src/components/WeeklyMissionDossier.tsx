@@ -33,8 +33,8 @@ export function WeeklyMissionDossier({ week }: WeeklyMissionDossierProps) {
           </summary>
           <div className="mission-panel__content">
             <div className="teach-first">
-              <strong>TEACHING PROTOCOL</strong>
-              <p>AI wajib menjelaskan konsep di bawah dalam Bahasa Indonesia sebelum meminta draft: definisi sederhana, alasan konsep ini penting, contoh dari case minggu ini, anti-pattern, dan satu pertanyaan cek pemahaman.</p>
+              <strong>INTERMEZZO PROTOCOL</strong>
+              <p>AI menjelaskan satu konsep per giliran: arti singkat, kaitan dengan case, satu hal yang perlu diwaspadai, lalu satu pertanyaan cek. AI menunggu jawaban lo sebelum lanjut; analogi atau detail kode hanya muncul kalau lo minta.</p>
               <div>{week.concepts.map((concept) => <span key={concept}>{concept}</span>)}</div>
             </div>
             <div className="resource-list">

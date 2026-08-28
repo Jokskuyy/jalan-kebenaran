@@ -34,6 +34,10 @@ describe('buildMissionPrompt', () => {
       expect(first).toContain('Teach before you test');
       expect(first).toContain('CONCEPTS TO TEACH BEFORE MY ATTEMPT');
       expect(first).toContain('case-and-concept readback');
+      expect(first).toContain('## INTERMEZZO PROTOCOL');
+      expect(first).toContain('Teach exactly one concept per turn');
+      expect(first).toContain('The first response must only orient me');
+      expect(first).toContain('## USER CONTROLS');
       expect(first).not.toContain('Explain the concept in Bahasa Indonesia with a definition');
       for (const heading of requiredHeadings) expect(first).toContain(heading);
     }
@@ -53,9 +57,10 @@ describe('buildMissionPrompt', () => {
     expect(prompt).toContain('/cases/regularag/interview-notes.md');
     expect(prompt).toContain('Problem before solution');
     expect(prompt).toContain('workflow mapping');
-    expect(prompt).toContain('Definition: Peta urutan kerja');
-    expect(prompt).toContain('Case example: Untuk RegulaRAG');
-    expect(prompt).toContain('Common trap: Menggambar fitur aplikasi');
+    expect(prompt).toContain('Arti: Peta urutan kerja');
+    expect(prompt).toContain('Di kasus ini: Untuk RegulaRAG');
+    expect(prompt).toContain('Waspada: Menggambar fitur aplikasi');
+    expect(prompt).toContain('Keep each intermezzo under 70 words');
   });
 
   it('uses an explicit preview origin without losing prompt purity', () => {
