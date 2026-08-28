@@ -12,16 +12,40 @@ export function WeeklyMissionDossier({ week }: WeeklyMissionDossierProps) {
   return (
     <details className="mission-dossier">
       <summary>
-        <span>FULL MISSION DOSSIER</span>
+        <span>MISSION KIT</span>
         <strong>{caseLabel}</strong>
-        <em>Open brief + files ↘</em>
+        <em>Open context + files ↘</em>
       </summary>
 
       <div className="mission-dossier__body">
-        <div className="mission-context">
-          <span>SYNTHETIC TRAINING CASE · AI COACHES, YOU BUILD</span>
-          <p>{week.mission.context}</p>
-        </div>
+        <section className="mission-preflight" aria-label={`Pre-flight mission minggu ${week.week}`}>
+          <header>
+            <span>PRE-FLIGHT · SYNTHETIC CASE</span>
+            <p>{week.mission.story.opening}</p>
+          </header>
+          <dl>
+            <div>
+              <dt>SITUATION</dt>
+              <dd>{week.mission.context}</dd>
+            </div>
+            <div>
+              <dt>MISSION THIS WEEK</dt>
+              <dd>{week.clientOutcome} Deliverable: {week.mission.deliverable.title}.</dd>
+            </div>
+            <div>
+              <dt>YOUR FIRST MOVE</dt>
+              <dd>Buka evidence dan starter brief, lalu klik Copy full mission. Jawab satu keputusan per adegan.</dd>
+            </div>
+            <div>
+              <dt>AI WILL</dt>
+              <dd>Memainkan client dan coach, memberi satu adegan per giliran, lalu menunggu jawaban lo.</dd>
+            </div>
+            <div>
+              <dt>DONE WHEN</dt>
+              <dd>{week.gate}</dd>
+            </div>
+          </dl>
+        </section>
 
         <details className="mission-panel">
           <summary>
@@ -33,8 +57,8 @@ export function WeeklyMissionDossier({ week }: WeeklyMissionDossierProps) {
           </summary>
           <div className="mission-panel__content">
             <div className="teach-first">
-              <strong>INTERMEZZO PROTOCOL</strong>
-              <p>AI menjelaskan satu konsep per giliran: arti singkat, kaitan dengan case, satu hal yang perlu diwaspadai, lalu satu pertanyaan cek. AI menunggu jawaban lo sebelum lanjut; analogi atau detail kode hanya muncul kalau lo minta.</p>
+              <strong>STORY-FIRST PROTOCOL</strong>
+              <p>AI membawa lo ke satu adegan client, meminta keputusan, lalu baru memberi nama konsep yang barusan lo pakai. Satu adegan per giliran; AI tidak melanjutkan sebelum lo menjawab.</p>
               <div>{week.concepts.map((concept) => <span key={concept}>{concept}</span>)}</div>
             </div>
             <div className="resource-list">

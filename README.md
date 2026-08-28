@@ -28,7 +28,8 @@ The AI is deliberately constrained to act as a tutor, coach, and client simulato
 
 - Mission Control with start date, automatically calculated current week, progress, and next milestone.
 - Clickable delivery loop: `Discover → Design → Orchestrate → Evaluate → Operate → Prove`.
-- Sixteen execution weeks with official learning resources, synthetic client evidence, downloadable starter files, deliverable specifications, visible rubrics, and quality gates.
+- Sixteen story-first missions that place the learner in a client scene, wait for a decision, reveal the concept through feedback, and only then move toward the weekly deliverable.
+- Collapsible Mission Kits with official learning resources, synthetic client evidence, downloadable starter files, deliverable specifications, visible rubrics, and quality gates.
 - A deterministic **Copy full mission** prompt that includes the case, evidence, constraints, files, output format, rubric, and coach-first protocol—ready for a new AI chat.
 - Filter-aware skill map that separates core capabilities from supporting engineering.
 - Two scoped portfolio labs: **RegulaRAG ID** and **InvoiceOps Agent**.
@@ -81,7 +82,7 @@ pnpm test
 pnpm build
 ```
 
-The GitHub Actions workflow runs the same checks on every push and pull request. Tests validate all 16 case assignments, resource limits, prompt completeness and determinism, the W01 coach-first contract, starter-file existence, roadmap structure, and legacy progress parsing.
+The GitHub Actions workflow runs the same checks on every push and pull request. Tests validate all 16 case assignments, story-beat order, resource limits, prompt completeness and determinism, the W01 story-first contract, starter-file existence, roadmap structure, and legacy progress parsing.
 
 ## Deployment
 
