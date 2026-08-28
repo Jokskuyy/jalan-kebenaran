@@ -158,14 +158,21 @@ a { color: inherit; }
 .mission-dossier > summary::after { content: '+'; display: none; }
 .mission-dossier[open] > summary { background: var(--amber); }
 .mission-dossier[open] > summary em { color: transparent; }
-.mission-dossier[open] > summary em::after { content: 'CLOSE DOSSIER ↑'; color: var(--ink); }
+.mission-dossier[open] > summary em::after { content: 'CLOSE KIT ↑'; color: var(--ink); }
 .mission-dossier > summary span { color: #765b13; font: 700 9px/1.3 'IBM Plex Mono', monospace; letter-spacing: .11em; }
 .mission-dossier > summary strong { font: 650 16px/1.2 'Bricolage Grotesque', sans-serif; }
 .mission-dossier > summary em { color: #765b13; font: 600 9px/1.2 'IBM Plex Mono', monospace; font-style: normal; letter-spacing: .08em; white-space: nowrap; }
 .mission-dossier__body { border-top: 1px solid var(--ink); background: #f7faf9; }
-.mission-context { display: grid; grid-template-columns: 190px 1fr; gap: 24px; padding: 24px 26px; background: var(--ink); color: white; }
-.mission-context span { color: var(--teal); font: 650 9px/1.5 'IBM Plex Mono', monospace; letter-spacing: .1em; }
-.mission-context p { margin: 0; font-size: 15px; line-height: 1.5; }
+.mission-preflight { background: var(--ink); color: white; }
+.mission-preflight > header { display: grid; grid-template-columns: 190px 1fr; gap: 24px; padding: 24px 26px; }
+.mission-preflight > header span { color: var(--teal); font: 650 9px/1.5 'IBM Plex Mono', monospace; letter-spacing: .1em; }
+.mission-preflight > header p { margin: 0; font-size: 15px; line-height: 1.5; }
+.mission-preflight dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; border-top: 1px solid #2d3a59; }
+.mission-preflight dl > div { min-width: 0; padding: 18px 26px; border-right: 1px solid #2d3a59; border-bottom: 1px solid #2d3a59; }
+.mission-preflight dl > div:nth-child(2n) { border-right: 0; }
+.mission-preflight dl > div:last-child { grid-column: 1 / -1; border-right: 0; border-bottom: 0; }
+.mission-preflight dt { margin-bottom: 7px; color: var(--teal); font: 650 9px/1.4 'IBM Plex Mono', monospace; letter-spacing: .1em; }
+.mission-preflight dd { margin: 0; color: #d9e5e2; font-size: 13px; line-height: 1.5; }
 .mission-panel { border-bottom: 1px solid var(--line); }
 .mission-panel > summary { display: grid; grid-template-columns: 42px 1fr auto; gap: 14px; align-items: start; padding: 22px 26px; cursor: pointer; list-style: none; }
 .mission-panel > summary::-webkit-details-marker { display: none; }
@@ -384,7 +391,10 @@ a { color: inherit; }
   .mission-dossier > summary { grid-template-columns: 1fr auto; padding-inline: 20px; }
   .mission-dossier > summary span { grid-column: 1 / -1; }
   .mission-dossier > summary em { grid-column: 2; grid-row: 2; }
-  .mission-context { grid-template-columns: 1fr; padding: 20px; }
+  .mission-preflight > header { grid-template-columns: 1fr; padding: 20px; }
+  .mission-preflight dl { grid-template-columns: 1fr; }
+  .mission-preflight dl > div, .mission-preflight dl > div:nth-child(2n) { padding-inline: 20px; border-right: 0; }
+  .mission-preflight dl > div:last-child { grid-column: auto; }
   .mission-panel > summary { padding: 20px; }
   .mission-panel__content { padding: 0 20px 22px; }
   .resource-list, .starter-file-list, .rubric-list { grid-template-columns: 1fr; }

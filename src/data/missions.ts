@@ -29,10 +29,24 @@ export type MissionDeliverable = {
   sections: string[];
 };
 
+export type StoryBeat = {
+  concept: string;
+  title: string;
+  situation: string;
+  decisionQuestion: string;
+};
+
+export type MissionStory = {
+  learnerRole: string;
+  opening: string;
+  beats: StoryBeat[];
+};
+
 export type WeeklyMission = {
   caseIds: CaseId[];
   context: string;
   rawEvidence: string[];
+  story: MissionStory;
   resources: LearningResource[];
   starterAssets: StarterAsset[];
   deliverable: MissionDeliverable;
@@ -389,6 +403,170 @@ function rubric(id: string, label: string, passCondition: string): RubricItem {
   return { id, label, passCondition };
 }
 
+function beat(
+  concept: string,
+  title: string,
+  situation: string,
+  decisionQuestion: string,
+): StoryBeat {
+  return { concept, title, situation, decisionQuestion };
+}
+
+function story(
+  learnerRole: string,
+  opening: string,
+  beats: StoryBeat[],
+): MissionStory {
+  return { learnerRole, opening, beats };
+}
+
+const missionStories: Record<number, MissionStory> = {
+  1: story(
+    'junior solution architect yang baru bergabung di discovery RegulaRAG',
+    'Lo masuk ke tim sebelum solusi dipilih. Tugas lo adalah memahami pekerjaan compliance sebagaimana berlangsung sekarang, bukan membenarkan permintaan chatbot.',
+    [
+      beat('workflow mapping', 'Satu pertanyaan, banyak tempat mencari', 'Seorang analyst menerima pertanyaan dari shared inbox atau ticket queue. Ia mencari lewat Drive, bookmark pribadi, dan kadang bertanya ke senior analyst sebelum jawaban dikirim; sample menunjukkan 15–90 menit dan pencatatan waktunya belum konsisten.', 'Informasi dan langkah apa yang perlu lo catat dari satu tiket agar bisa menemukan di mana waktu hilang?'),
+      beat('stakeholder', 'Semua peduli, tetapi tidak semua memutuskan', 'Operations ingin jawaban lebih cepat, analyst menjalankan pekerjaan, dan Legal wajib menyetujui interpretasi berisiko. Senior analyst sering dimintai bantuan, sementara owner cycle time dan owner versi dokumen belum terverifikasi.', 'Bagaimana lo membedakan primary user, process owner, risk approver, dan knowledge owner tanpa menebak jabatan?'),
+      beat('baseline KPI', 'Angka satu jam yang belum menjadi baseline', 'Manager menyebut jawaban biasanya sekitar satu jam, tetapi workflow sample bervariasi 15–90 menit dan source attachment tidak selalu ada. Belum ada periode, denominator, atau owner data yang disepakati.', 'Pilih satu KPI awal: bagaimana formula, unit, sample, sumber, owner, dan confidence-nya harus ditulis?'),
+    ],
+  ),
+  2: story(
+    'junior solution architect yang harus menilai apakah RegulaRAG benar-benar membutuhkan agent',
+    'Problem brief sudah tersedia. Sekarang lo harus menahan dorongan memilih teknologi sebelum membandingkan pilihan yang lebih sederhana.',
+    [
+      beat('agent vs workflow', 'Chatbot bukan satu-satunya jawaban', 'Client meminta chatbot, tetapi mayoritas pekerjaan adalah menemukan policy yang tepat dan menampilkan sumber. Sebagian langkah mengikuti aturan tetap; hanya bagian tertentu yang mungkin membutuhkan keputusan dinamis.', 'Bagian mana yang cukup dijalankan sebagai rules, search, atau workflow, dan bagian mana yang benar-benar membutuhkan keputusan agent?'),
+      beat('RAG fit', 'Jawaban harus membawa bukti', 'Corpus RegulaRAG berisi regulasi publik dan SOP sintetis yang berubah setiap bulan. Client membutuhkan sumber, sedangkan interpretasi dan exception tetap bukan kewenangan sistem.', 'Outcome apa yang layak dibantu retrieval dan generation, serta bukti minimum apa yang harus menyertai jawaban?'),
+      beat('human boundary', 'Pertanyaan yang tidak boleh diselesaikan sendiri', 'Sebuah pertanyaan dapat meminta interpretasi berisiko atau membahas policy exception. Sistem boleh mengumpulkan evidence, tetapi approval tetap berada pada manusia yang berwenang.', 'Pada titik mana sistem harus pause, evidence apa yang ditampilkan, dan siapa yang boleh menyetujui kelanjutannya?'),
+    ],
+  ),
+  3: story(
+    'junior AI solution engineer yang merancang kontrak tool RegulaRAG',
+    'Pendekatan evidence-grounded sudah dipilih. Sebelum menulis prompt, lo harus memastikan output dapat diperiksa dan digunakan sistem lain.',
+    [
+      beat('structured output', 'Citation yang terlihat rapi tetapi tidak dapat dipercaya', 'Caller membutuhkan document ID, page, passage, dan confidence. Jawaban model yang hanya berupa teks atau JSON bebas dapat kehilangan field penting tanpa terlihat gagal.', 'Struktur output minimum apa yang harus diwajibkan agar missing evidence menjadi error yang jelas?'),
+      beat('tool schema', 'Tool pencarian membutuhkan pagar', 'Document inventory mempunyai version, status, page, dan authority metadata. Tool retrieval perlu menerima filter yang terbatas dan membedakan success, no evidence, invalid filter, timeout, serta dependency failure.', 'Input, output, permission, dan error apa yang harus menjadi kontrak eksplisit tool ini?'),
+      beat('validation', 'Output valid secara bentuk, salah secara bisnis', 'Sebuah citation record dapat lolos sebagai JSON tetapi menunjuk dokumen superseded atau kehilangan page evidence. Sistem berikutnya tidak boleh memperbaiki kekurangan itu diam-diam.', 'Validasi mana yang berasal dari schema dan mana yang harus memeriksa aturan corpus serta provenance?'),
+    ],
+  ),
+  4: story(
+    'junior AI solution engineer yang membatasi control plane RegulaRAG',
+    'Tool sudah memiliki kontrak. Kini lo menentukan bagaimana satu run bergerak, berhenti, pulih, atau meminta bantuan manusia.',
+    [
+      beat('state machine', 'Run yang tidak tahu kapan selesai', 'Retrieval dapat berhasil, timeout, atau mengembalikan zero evidence; user juga dapat meminta sesuatu di luar corpus. Tanpa state dan terminal path, assistant dapat terus mencoba atau menghasilkan jawaban ambigu.', 'State, event, dan terminal state apa yang diperlukan untuk membedakan success, abstain, escalation, dan failed?'),
+      beat('retry', 'Timeout bukan izin mencoba selamanya', 'Dependency retrieval dapat mengalami gangguan sementara. Retry mungkin membantu, tetapi percobaan tanpa batas dapat memperpanjang latency dan memperburuk outage.', 'Error mana yang layak dicoba ulang, berapa batasnya, dan kapan run harus berhenti atau dieskalasi?'),
+      beat('approval', 'Batas sebelum tindakan non-read-only', 'RegulaRAG dirancang untuk mencari dan menyusun evidence. Jika sebuah permintaan mengarah pada action di luar read-only, run harus berhenti sebelum side effect terjadi.', 'Apa yang harus terikat pada approval agar keputusan tidak stale dan tidak dapat digunakan untuk case lain?'),
+    ],
+  ),
+  5: story(
+    'junior retrieval engineer yang membangun baseline RegulaRAG',
+    'Architecture telah disepakati. Lo mulai dari ingestion dan retrieval sederhana yang dapat diulang sebelum menambahkan optimasi.',
+    [
+      beat('ingestion', 'Corpus yang tidak semuanya boleh dipakai', 'Document inventory mencampur dokumen aktif, superseded, table-heavy, dan OCR-required. Semua sumber tetap harus memiliki version, owner, status, serta page lineage.', 'Metadata dan pemeriksaan apa yang menentukan sebuah dokumen boleh masuk retrieval aktif?'),
+      beat('chunking', 'Potongan yang kehilangan asalnya', 'SOP dan regulasi perlu dipecah agar dapat dicari, tetapi potongan terlalu kecil kehilangan konteks dan potongan terlalu besar menghasilkan retrieval yang noisy. Citation tetap harus kembali ke page atau section asal.', 'Batas pemotongan apa yang lo pilih dan metadata apa yang wajib ikut pada setiap chunk?'),
+      beat('vector retrieval', 'Mirip secara makna belum tentu boleh dipakai', 'Pertanyaan compliance dapat menemukan passage yang mirip secara semantic, termasuk dokumen yang salah versi atau tidak sesuai collection. Similarity score tidak membuktikan authority maupun kebenaran.', 'Filter apa yang harus diterapkan sebelum ranking, dan output baseline apa yang perlu dicatat sebelum optimasi?'),
+    ],
+  ),
+  6: story(
+    'junior evaluation engineer yang membandingkan retrieval RegulaRAG',
+    'Baseline berjalan. Tugas lo adalah membuktikan apakah perubahan retrieval benar-benar memperbaiki evidence, bukan sekadar membuat demo terasa lebih bagus.',
+    [
+      beat('hybrid search', 'Nomor regulasi yang hilang dalam pencarian semantic', 'Sebagian golden questions memakai istilah konseptual, sedangkan sebagian lain menyebut nomor regulasi atau frasa exact. Vector-only dan lexical search dapat gagal pada jenis query yang berbeda.', 'Bagaimana lo membandingkan vector-only dengan kombinasi lexical dan semantic pada dataset yang sama?'),
+      beat('reranking', 'Dua puluh kandidat, lima tempat untuk evidence', 'Retrieval awal dapat menghasilkan banyak passage kandidat. Reranker mungkin menaikkan passage relevan ke posisi atas, tetapi juga menambah latency dan belum tentu memperbaiki corpus yang buruk.', 'Kapan reranking dianggap memberi nilai, dan metric serta latency apa yang harus dibandingkan?'),
+      beat('Recall@k', 'Metric tinggi yang belum menjamin jawaban benar', 'Client peduli source correctness. Passage gold yang muncul dalam top five membantu, tetapi tidak membuktikan citation yang dipakai benar atau generated claim didukung evidence.', 'Apa yang diukur Recall@5, apa yang tidak diukur, dan metric pendamping apa yang dibutuhkan?'),
+    ],
+  ),
+  7: story(
+    'junior AI security engineer yang menguji knowledge boundary RegulaRAG',
+    'Retrieval membaik. Sekarang lo memperlakukan pertanyaan dan dokumen sebagai input yang dapat salah atau sengaja berbahaya.',
+    [
+      beat('abstention', 'Pertanyaan yang tidak punya dasar jawaban', 'Beberapa golden questions tidak memiliki evidence di corpus dan dua versi SOP dapat berkonflik. Jawaban yang terdengar yakin tetapi tidak bersumber menimbulkan risiko compliance.', 'Signal apa yang membuat sistem harus menolak menjawab, dan jalur aman apa yang diberikan kepada user?'),
+      beat('prompt injection', 'Instruksi tersembunyi di dalam SOP', 'Satu SOP sintetis berisi instruksi agar model mengabaikan system policy. Teks itu masuk melalui retrieval sebagai data, bukan sebagai instruksi yang berwenang.', 'Bagaimana arsitektur memisahkan trusted instruction dari untrusted document text dan membuktikannya lewat test?'),
+      beat('data boundary', 'Permintaan di luar collection yang diizinkan', 'User mencoba meminta dokumen di luar allowed collection. Prompt, secret, dan sensitive payload juga tidak boleh muncul pada citation atau trace.', 'Data apa yang boleh masuk, dilihat, disimpan, dan keluar pada setiap boundary sistem?'),
+    ],
+  ),
+  8: story(
+    'junior AI solution engineer yang menyiapkan delivery packet RegulaRAG',
+    'Sistem harus dapat dipahami stakeholder dalam lima menit dan tetap menunjukkan evidence ketika normal flow gagal.',
+    [
+      beat('tracing', 'Demo gagal tanpa petunjuk di langkah mana', 'Normal flow dapat terlihat baik, tetapi retrieval kosong, reranker, abstention, atau dependency error tidak dapat dijelaskan jika hanya output akhir yang dicatat.', 'Event dan span apa yang harus tersambung agar satu run dapat direkonstruksi dari ingest sampai answer atau abstain?'),
+      beat('latency', 'Rata-rata cepat, sebagian user tetap menunggu lama', 'README belum menunjukkan p50 dan p95. Waktu total berasal dari retrieval, reranking, model, queue, dan kemungkinan human wait yang memiliki owner berbeda.', 'Boundary latency apa yang relevan, percentile apa yang dilaporkan, dan bagaimana lo menemukan komponen paling lambat?'),
+      beat('cost per query', 'Harga model bukan seluruh biaya', 'Satu query dapat memakai retrieval, reranking, model, storage, retry, dan human escalation. Cost claim tanpa workload dan trace akan sulit dipercaya client.', 'Komponen biaya apa yang dihitung per query dan asumsi apa yang harus terlihat pada laporan?'),
+    ],
+  ),
+  9: story(
+    'junior operations solution architect yang memetakan InvoiceOps',
+    'Lo pindah ke case finance. Sebelum membuat agent, lo harus memahami jalur invoice normal dan exception yang saat ini bercampur.',
+    [
+      beat('process mining', 'Invoice yang berpindah tanpa jejak terpadu', 'Tim AP menerima invoice melalui email dan spreadsheet lalu mencocokkannya dengan PO serta goods receipt di mock ERP. Normal case dan exception bercampur, sementara audit trail belum terpadu.', 'Event minimum apa yang perlu dicatat agar satu invoice dapat direkonstruksi dari intake sampai terminal state?'),
+      beat('exception taxonomy', 'Empat masalah, empat jalur penanganan', 'Duplicate upload, missing PO, quantity mismatch, dan scan buruk mempunyai signal, owner, recovery, serta risiko berbeda. Kategori yang terlalu umum akan membuat routing dan SLA tidak actionable.', 'Bagaimana lo membedakan kategori exception dan menentukan owner, allowed action, serta terminal state-nya?'),
+      beat('permission map', 'Yang memproses bukan yang boleh membayar', 'Staf AP menjalankan workflow dan Finance Controller memegang payment approval. Agent boleh membaca evidence atau mengusulkan route, tetapi tidak boleh menghitung pajak atau melakukan pembayaran.', 'Capability mana yang boleh read, propose, approve, write, atau harus selalu deny untuk setiap role?'),
+    ],
+  ),
+  10: story(
+    'junior agentic automation engineer yang menghubungkan InvoiceOps ke tools',
+    'Process map stabil. Lo membangun integration layer sambil menjaga calculation rules tetap deterministic dan dapat diuji.',
+    [
+      beat('typed tools', 'Tool mengembalikan data yang tidak dapat dibedakan dari error', 'InvoiceOps perlu membaca PO, receipt, dan vendor dari mock ERP. Caller harus dapat membedakan success, not found, invalid input, timeout, dan dependency failure tanpa menebak dari teks.', 'Kontrak input, output, permission, timeout, dan error apa yang diperlukan untuk setiap tool?'),
+      beat('mock ERP', 'Dependency aman untuk dibuat gagal', 'Lo tidak boleh menyentuh ERP nyata, tetapi tetap perlu menguji missing PO, quantity mismatch, timeout, dan outage. Simulator yang selalu happy path akan memberi confidence palsu.', 'Behavior normal dan failure apa yang harus disediakan mock ERP agar contract dan recovery dapat diuji?'),
+      beat('n8n webhook', 'Event yang datang dua kali', 'Invoice dapat dikirim ulang melalui email atau webhook. n8n hanya menjadi inbound integration layer dan tidak boleh menyimpan hidden business logic.', 'Apa yang harus divalidasi, dicatat, dan di-dedupe sebelum webhook mengakui event sebagai diterima?'),
+    ],
+  ),
+  11: story(
+    'junior agentic automation engineer yang membuat approval workflow dapat dilanjutkan',
+    'Tools bekerja. Sekarang satu case harus mampu pause berjam-jam, ditinjau, lalu resume tanpa kehilangan evidence atau memakai approval lama.',
+    [
+      beat('checkpoint', 'Case berhenti saat menunggu reviewer', 'Low-confidence extraction harus masuk reviewer queue. Selama menunggu, service dapat restart dan case dapat berubah, sehingga chat history saja tidak cukup sebagai state.', 'State, evidence snapshot, dan version apa yang harus disimpan agar case dapat dilanjutkan dengan aman?'),
+      beat('human-in-the-loop', 'Reviewer membutuhkan lebih dari tombol approve', 'Reviewer harus melihat extracted fields, source region, deterministic calculations, confidence, dan alasan escalation. Tanpa context itu, approval hanya memindahkan risiko ke manusia.', 'Informasi dan tindakan minimum apa yang harus tersedia agar reviewer dapat memeriksa, mengoreksi, atau menolak case?'),
+      beat('audit trail', 'Pertanyaan setelah write terjadi', 'Tim perlu menjawab siapa mengubah route, evidence version mana yang dilihat, approval token apa yang dipakai, dan apakah write terjadi sekali. Log sensitif juga tidak boleh membocorkan secret.', 'Event apa yang harus immutable agar urutan actor, decision, state change, dan side effect dapat direkonstruksi?'),
+    ],
+  ),
+  12: story(
+    'junior reliability engineer yang menguji failure InvoiceOps',
+    'Happy path selesai. Lo sengaja membuat duplicate input, timeout, malformed output, dan outage untuk memastikan tidak ada aksi ganda atau case hilang.',
+    [
+      beat('idempotency', 'Webhook yang diputar ulang', 'Delivery menggunakan at-least-once semantics sehingga event yang sama dapat datang lebih dari sekali. Dependency juga dapat berhasil setelah caller menganggap request timeout.', 'Key dan state check apa yang memastikan replay menghasilkan satu case dan satu side effect?'),
+      beat('backoff', 'Semua worker mencoba lagi bersamaan', 'ERP outage atau rate limit dapat bersifat sementara. Retry serentak tanpa batas akan memperparah dependency failure dan meningkatkan latency.', 'Bagaimana menentukan timeout, retry count, delay yang meningkat, jitter, dan kondisi berhenti?'),
+      beat('dead-letter queue', 'Message yang tidak pernah berhasil', 'Malformed payload atau dependency failure dapat tetap gagal setelah retry budget habis. Message tidak boleh hilang atau diputar tanpa akhir.', 'Informasi apa yang masuk dead-letter path, siapa owner-nya, dan syarat apa yang membuat replay aman?'),
+    ],
+  ),
+  13: story(
+    'junior evaluation engineer yang mengukur outcome InvoiceOps',
+    'Workflow sudah reliable. Lo harus membuktikan apakah automation mengurangi kerja manual tanpa menyembunyikan low-confidence atau risiko finansial.',
+    [
+      beat('routing accuracy', 'Accuracy tinggi yang menyembunyikan exception berisiko', 'Dataset sintetis memuat normal, mismatch, duplicate, low-confidence, dan malicious cases. Satu aggregate accuracy dapat menutupi kegagalan pada category berisiko tinggi.', 'Bagaimana gold label, metric per category, dan error analysis disusun agar routing claim dapat dipercaya?'),
+      beat('human-touch time', 'Kerja manual hilang atau hanya berpindah', 'Assisted workflow dapat mengurangi pencarian, tetapi low-confidence case tetap masuk reviewer queue. Handoff dan waktu tunggu tidak boleh dihapus dari pengukuran.', 'Touch manusia apa yang dihitung dari intake sampai terminal state dan bagaimana dibandingkan dengan manual baseline?'),
+      beat('cost per case', 'ROI sintetis yang terlihat terlalu pasti', 'Cost mencakup model, tools, storage, retries, dan loaded human review time. Manual baseline dan volume memakai data sintetis sehingga tidak boleh diklaim sebagai savings client nyata.', 'Formula, asumsi, sensitivity, dan limitation apa yang wajib terlihat pada simulated ROI?'),
+    ],
+  ),
+  14: story(
+    'AI solution engineer yang mengubah dua project menjadi evidence untuk recruiter dan client',
+    'RegulaRAG dan InvoiceOps sudah memiliki artifact teknis. Kini lo harus membuat pembaca memahami problem, keputusan, bukti, dan batasannya dalam lima menit.',
+    [
+      beat('case study', 'Recruiter membuka README sebelum code', 'Pembaca pertama kali melihat dua repository dan belum mengetahui konteks client. Feature list tidak menjelaskan pain, constraint, atau bukti bahwa sistem bekerja.', 'Urutan informasi apa yang membuat problem, action lo, result, dan evidence dapat dipahami dalam lima menit?'),
+      beat('architecture narrative', 'Diagram yang tidak menjelaskan keputusan', 'RegulaRAG memisahkan evidence retrieval dari interpretasi manusia; InvoiceOps memisahkan model extraction dari deterministic calculations dan payment approval. Diagram saja tidak menunjukkan alasan trade-off itu.', 'Bagaimana lo menjelaskan context, alternatives, decision, dan consequence untuk satu keputusan penting?'),
+      beat('limitations', 'Demo sintetis yang terlihat seperti hasil client nyata', 'Evaluation dan ROI memakai data publik atau sintetis. Known failures dan non-goals harus terlihat agar metric tidak berubah menjadi klaim bisnis yang berlebihan.', 'Klaim apa yang boleh dibuat, apa yang harus diberi limitation, dan bukti apa yang masih belum tersedia?'),
+    ],
+  ),
+  15: story(
+    'AI engineer candidate yang mempertahankan keputusan project dalam interview',
+    'Portfolio siap dibaca. Interviewer akan mengubah constraint dan meminta alasan di balik architecture, evaluation, safety, cost, serta rollback.',
+    [
+      beat('system design', 'Constraint berubah saat diagram belum selesai', 'Interviewer menaikkan workload atau mengubah reliability requirement. Menyebut framework tidak menjelaskan boundary, state, tool permission, eval, dan recovery.', 'Pertanyaan klarifikasi dan keputusan architecture apa yang lo prioritaskan ketika constraint berubah?'),
+      beat('English walkthrough', 'Penjelasan teknis yang kehilangan alur', 'Lo harus menjelaskan problem, evidence, architecture, evaluation, failure, dan limitation dalam working English. Jargon panjang akan sulit dipertahankan saat interviewer bertanya why.', 'Bagaimana lo menyusun walkthrough sepuluh menit dan menjelaskan satu trade-off dalam tiga kalimat sederhana?'),
+      beat('STAR stories', 'Aktivitas banyak, kontribusi pribadi tidak terlihat', 'Project mempunyai momen ketika evaluation menemukan citation failure atau failure test menemukan duplicate action. Interviewer perlu memahami situasi, tanggung jawab lo, tindakan, dan result berbukti.', 'Pengalaman mana yang lo pilih dan evidence apa yang membuat action serta result pribadi terlihat jelas?'),
+    ],
+  ),
+  16: story(
+    'AI engineer candidate yang menjalankan pencarian kerja sebagai eksperimen terukur',
+    'Lo tidak mengirim aplikasi secara acak. Portfolio evidence menjadi input dan respons market menjadi signal untuk menentukan eksperimen berikutnya.',
+    [
+      beat('target roles', 'Judul berbeda, kebutuhan mirip', 'Lowongan memakai title AI Solutions Engineer, Agentic Developer, atau Automation Specialist, tetapi capability yang diminta dapat tumpang tindih. Satu positioning untuk semua role membuat evidence kurang relevan.', 'Bagaimana lo mengelompokkan role berdasarkan problem dan capability, lalu memilih evidence portfolio untuk tiap cluster?'),
+      beat('funnel diagnosis', 'Banyak aplikasi, sedikit pembelajaran', 'Tidak mendapat screening, gagal technical interview, dan gagal final interview menunjukkan kemungkinan bottleneck yang berbeda. Menambah volume saja tidak menjelaskan penyebabnya.', 'Metric dan signal apa yang membedakan masalah targeting, CV, technical depth, dan storytelling?'),
+      beat('iteration backlog', 'Semua terasa perlu diperbaiki sekaligus', 'Funnel menghasilkan beberapa gap, sementara waktu lo terbatas. Mempercantik landing page belum tentu mengurangi risiko terbesar jika evidence failure handling masih lemah.', 'Bagaimana lo memprioritaskan eksperimen dua minggu berdasarkan uncertainty, impact, effort, dan learning value?'),
+    ],
+  ),
+};
+
 export const weeklyMissions: Record<number, WeeklyMission> = {
   1: {
     caseIds: ['regularag'],
@@ -398,6 +576,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
       'Analyst memakai Drive search, bookmark pribadi, dan bertanya ke senior analyst.',
       'Beberapa jawaban tidak memiliki source attachment dan request yang sama dapat dibuka ulang.',
     ],
+    story: missionStories[1],
     resources: [resources.discovery, resources.measuring],
     starterAssets: [regularag.brief, regularag.interviews, regularag.workflow, regularag.problemTemplate],
     deliverable: {
@@ -417,6 +596,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['regularag'],
     context: 'Problem brief sudah tersedia. Client perlu keputusan apakah pain ini membutuhkan rules, search, RAG assistant, atau tool-using agent.',
     rawEvidence: ['Mayoritas kebutuhan adalah menemukan policy yang tepat.', 'Interpretasi dan policy exception tetap milik manusia.', 'Corpus berubah setiap bulan dan sumber wajib ditampilkan.'],
+    story: missionStories[2],
     resources: [resources.agentGuide, resources.feedbackControl],
     starterAssets: [regularag.brief, regularag.interviews, regularag.fitTemplate],
     deliverable: { title: 'Agent-fit assessment', language: 'English', format: 'Decision memo + weighted scorecard', sections: ['Options', 'Decision criteria', 'Scores and evidence', 'Recommended approach', 'Human boundary', 'Rejected complexity'] },
@@ -428,6 +608,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['regularag'],
     context: 'RegulaRAG dipilih sebagai evidence-grounded assistant. Sebelum prompting, retrieval dan citation tools membutuhkan kontrak ketat.',
     rawEvidence: ['Document inventory memiliki version, status, page, dan authority metadata.', 'Missing evidence harus menjadi explicit error state.', 'Caller membutuhkan machine-readable citation records.'],
+    story: missionStories[3],
     resources: [resources.structuredOutputs, resources.functionCalling, resources.pydantic],
     starterAssets: [regularag.inventory, regularag.contractTemplate],
     deliverable: { title: 'Typed retrieval tool contract', language: 'English', format: 'JSON Schema + contract tests', sections: ['Input schema', 'Success output', 'Error union', 'Validation rules', 'Audit fields', 'Negative tests'] },
@@ -439,6 +620,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['regularag'],
     context: 'Tool contracts ada. Sekarang batasi state, retries, terminal states, dan approval sebelum assistant dipakai.',
     rawEvidence: ['Retrieval dapat timeout atau mengembalikan zero evidence.', 'User dapat meminta interpretasi di luar corpus.', 'Run harus berhenti sebelum melakukan action yang bukan read-only.'],
+    story: missionStories[4],
     resources: [resources.agents, resources.humanApproval, resources.gracefulFailure],
     starterAssets: [regularag.brief, regularag.contractTemplate, regularag.threatTemplate],
     deliverable: { title: 'RegulaRAG control-plane ADR', language: 'English', format: 'ADR + state diagram + failure matrix', sections: ['Decision', 'State machine', 'Permission boundary', 'Retry budget', 'Escalation', 'Rollback'] },
@@ -450,6 +632,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['regularag'],
     context: 'Architecture disepakati. Bangun ingestion dan retrieval baseline yang sederhana sebelum hybrid search atau reranking.',
     rawEvidence: ['Corpus mencampur dokumen aktif, superseded, table-heavy, dan OCR-required.', 'Setiap chunk harus kembali ke source document dan page.', 'Golden set harus memuat answerable dan unanswerable questions.'],
+    story: missionStories[5],
     resources: [resources.retrieval, resources.pgvector],
     starterAssets: [regularag.inventory, regularag.questions, regularag.evalTemplate],
     deliverable: { title: 'RegulaRAG baseline repository', language: 'English', format: 'Runnable code + data manifest + baseline note', sections: ['Ingestion', 'Chunking decision', 'Metadata', 'Retrieval baseline', 'Golden set', 'Known limitations'] },
@@ -461,6 +644,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['regularag'],
     context: 'Baseline berjalan. Sekarang bandingkan retrieval variants dengan golden labels dan metric yang dapat direproduksi.',
     rawEvidence: ['Golden starter memuat direct, multi-document, unanswerable, dan adversarial questions.', 'Client peduli source correctness, bukan jawaban yang terdengar yakin.', 'Result perlu dibandingkan pada dataset yang sama.'],
+    story: missionStories[6],
     resources: [resources.evals, resources.rankedRetrieval, resources.evalPractice],
     starterAssets: [regularag.questions, regularag.evalTemplate, regularag.inventory],
     deliverable: { title: 'Retrieval evaluation notebook and report', language: 'English', format: 'Jupyter notebook + Markdown report', sections: ['Dataset', 'Baseline', 'Variants', 'Recall@k', 'Citation precision', 'Error analysis'] },
@@ -472,6 +656,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['regularag'],
     context: 'Retrieval membaik, tetapi dokumen dan pertanyaan sekarang diperlakukan sebagai adversarial input.',
     rawEvidence: ['Satu synthetic SOP berisi instruksi untuk mengabaikan system policy.', 'Beberapa questions tidak punya evidence di corpus.', 'User mencoba meminta dokumen di luar allowed collection.'],
+    story: missionStories[7],
     resources: [resources.ragSecurity, resources.promptInjection, resources.redTeaming],
     starterAssets: [regularag.questions, regularag.threatTemplate, regularag.brief],
     deliverable: { title: 'RegulaRAG threat model and adversarial suite', language: 'English', format: 'Threat model + regression dataset', sections: ['Assets', 'Trust boundaries', 'Attacker capabilities', 'Abuse paths', 'Mitigations', 'Regression results'] },
@@ -483,6 +668,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['regularag'],
     context: 'RegulaRAG harus dipaketkan sebagai client evidence: demo, trace, cost, quality report, dan honest limitations.',
     rawEvidence: ['Stakeholder punya waktu lima menit untuk memahami nilai sistem.', 'P95 latency dan cost per query belum terlihat di README.', 'Normal flow saja tidak membuktikan abstention atau recovery.'],
+    story: missionStories[8],
     resources: [resources.traces, resources.latency, resources.cost],
     starterAssets: [regularag.evalTemplate, regularag.threatTemplate, portfolio.caseStudy],
     deliverable: { title: 'RegulaRAG delivery packet', language: 'English', format: 'Live demo + README + case study + video', sections: ['Problem', 'Architecture', 'Evaluation', 'Failure demo', 'Cost and latency', 'Limitations'] },
@@ -494,6 +680,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['invoiceops'],
     context: 'Finance meminta automation untuk invoice matching. Mulai dari process dan exception taxonomy, bukan agent framework.',
     rawEvidence: ['Normal case dan exception sekarang bercampur di inbox yang sama.', 'Tax dan tolerance rules sudah ada tetapi tidak terdokumentasi konsisten.', 'Payment approval hanya boleh dilakukan finance controller.'],
+    story: missionStories[9],
     resources: [resources.bpmn, resources.authorization],
     starterAssets: [invoiceops.brief, invoiceops.process, invoiceops.taxonomy],
     deliverable: { title: 'InvoiceOps process and exception map', language: 'Mixed', format: 'BPMN/Mermaid + exception taxonomy', sections: ['As-is flow', 'States', 'Exceptions', 'Owner', 'Human decisions', 'Baseline KPI'] },
@@ -505,6 +692,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['invoiceops'],
     context: 'Process map stabil. Bangun mock ERP tools dan deterministic reconciliation rules dengan typed HTTP boundaries.',
     rawEvidence: ['Invoice dapat datang ulang lewat email dan webhook.', 'PO total, tax, dan receipt quantity adalah deterministic evidence.', 'n8n hanya boleh menerima event dan memanggil service API.'],
+    story: missionStories[10],
     resources: [resources.functionCalling, resources.fastapi, resources.n8nWebhook],
     starterAssets: [invoiceops.scenarios, invoiceops.permissions, invoiceops.taxonomy],
     deliverable: { title: 'InvoiceOps integration layer', language: 'English', format: 'FastAPI tools + pure rules + contract tests', sections: ['Tool schemas', 'Mock ERP', 'Deterministic rules', 'Webhook boundary', 'Errors', 'Tests'] },
@@ -516,6 +704,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['invoiceops'],
     context: 'Tools bekerja. Sekarang workflow harus pause, persist, meminta approval, resume, dan menghasilkan audit trail.',
     rawEvidence: ['Reviewer dapat terlambat beberapa jam sehingga approval bisa stale.', 'Case dapat berubah saat menunggu review.', 'Write action harus membawa approval token dan idempotency key.'],
+    story: missionStories[11],
     resources: [resources.sessions, resources.humanApproval, resources.logging],
     starterAssets: [invoiceops.permissions, invoiceops.process, invoiceops.failureTemplate],
     deliverable: { title: 'Resumable approval workflow', language: 'English', format: 'Stateful implementation + reviewer queue + audit log', sections: ['Checkpoint model', 'Approval token', 'State validation', 'Audit event', 'Resume path', 'Replay test'] },
@@ -527,6 +716,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['invoiceops'],
     context: 'Happy path selesai. Lakukan failure injection pada duplicate input, provider timeout, malformed output, dan ERP outage.',
     rawEvidence: ['Webhook delivery menggunakan at-least-once semantics.', 'Dependency dapat merespons setelah caller timeout.', 'Partial failure dapat terjadi setelah state tersimpan tetapi sebelum response terkirim.'],
+    story: missionStories[12],
     resources: [resources.idempotency, resources.retries, resources.deadLetter],
     starterAssets: [invoiceops.scenarios, invoiceops.failureTemplate, invoiceops.permissions],
     deliverable: { title: 'Failure-injection report and recovery runbook', language: 'English', format: 'Automated tests + Markdown runbook', sections: ['Failure hypothesis', 'Injection method', 'Expected state', 'Observed result', 'Recovery', 'Rollback'] },
@@ -538,6 +728,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['invoiceops'],
     context: 'Workflow reliable. Ukur extraction, routing, escalation, latency, cost, dan simulated human-touch reduction.',
     rawEvidence: ['Dataset starter memuat normal, mismatch, duplicate, low-confidence, dan malicious cases.', 'Manual baseline harus dihitung dengan metode yang dijelaskan.', 'Low confidence tidak boleh disembunyikan oleh aggregate accuracy.'],
+    story: missionStories[13],
     resources: [resources.evalPractice, resources.discovery, resources.signals],
     starterAssets: [invoiceops.scenarios, invoiceops.scorecardTemplate, invoiceops.taxonomy],
     deliverable: { title: 'InvoiceOps operating scorecard', language: 'English', format: 'Evaluation notebook + scorecard + simulated ROI model', sections: ['Dataset', 'Quality', 'Escalation', 'Reliability', 'Latency and cost', 'Simulated ROI', 'Limitations'] },
@@ -549,6 +740,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['regularag', 'invoiceops'],
     context: 'Dua systems sudah punya evidence. Ubah technical work menjadi client stories yang dapat dipahami dalam lima menit.',
     rawEvidence: ['Recruiter membuka README sebelum menjalankan code.', 'Architecture diagram tanpa decision rationale tidak cukup.', 'Setiap metric membutuhkan dataset, method, dan limitation.'],
+    story: missionStories[14],
     resources: [resources.adr, resources.c4, resources.readmes],
     starterAssets: [portfolio.caseStudy, regularag.evalTemplate, invoiceops.scorecardTemplate],
     deliverable: { title: 'Two recruiter-ready client case studies', language: 'English', format: 'README + case-study pages + 3–5 minute demos', sections: ['Problem', 'Constraints', 'Architecture decisions', 'Evaluation evidence', 'Failure handling', 'Business interpretation', 'Limitations'] },
@@ -560,6 +752,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['regularag', 'invoiceops'],
     context: 'Portfolio siap dibaca. Latih kemampuan mempertahankan setiap architecture, safety, evaluation, cost, dan rollback decision.',
     rawEvidence: ['Interviewer akan mengganti constraint saat diskusi.', 'Framework name bukan penjelasan architecture.', 'English walkthrough perlu tetap presisi saat ditanya failure modes.'],
+    story: missionStories[15],
     resources: [resources.technicalWriting, resources.audience, resources.star],
     starterAssets: [portfolio.interview, portfolio.caseStudy],
     deliverable: { title: 'Interview defense packet', language: 'English', format: 'Recorded walkthrough + design answers + STAR bank', sections: ['Ten-minute walkthrough', 'Trade-offs', 'Failure modes', 'Evaluation', 'Cost', 'Rollback', 'Six STAR stories'] },
@@ -571,6 +764,7 @@ export const weeklyMissions: Record<number, WeeklyMission> = {
     caseIds: ['regularag', 'invoiceops'],
     context: 'Jalankan pencarian kerja sebagai measurable funnel. Portfolio evidence menjadi input; market response menjadi evaluation signal.',
     rawEvidence: ['Target title bervariasi walau job description serupa.', 'No screening, failed technical, dan failed final membutuhkan eksperimen berbeda.', 'Application volume tanpa targeting tidak menghasilkan useful signal.'],
+    story: missionStories[16],
     resources: [resources.githubProfile, resources.profileReadme, resources.audience],
     starterAssets: [portfolio.funnel, portfolio.caseStudy, portfolio.interview],
     deliverable: { title: 'Application operating system', language: 'Mixed', format: 'Target list + funnel dashboard + 30-day experiment backlog', sections: ['Role clusters', 'Application evidence', 'Outreach', 'Stage conversion', 'Failure diagnosis', 'Next experiment'] },

@@ -5,9 +5,12 @@ import { buildMissionPrompt } from './missionPrompt';
 const requiredHeadings = [
   '## YOUR ROLE',
   '## COACH-FIRST RULES',
-  '## CASE DOSSIER',
+  '## STORY-FIRST PROTOCOL',
+  '## MISSION KIT · CASE REFERENCE',
   "## THIS WEEK'S RAW EVIDENCE",
   "## THIS WEEK'S MISSION",
+  '## STORY SETUP',
+  '## STORY BEATS — INTERNAL COACH GUIDE',
   '## NON-NEGOTIABLE CONSTRAINTS',
   '## LEARN FIRST — JUST IN TIME',
   '## STARTER FILES',
@@ -31,14 +34,17 @@ describe('buildMissionPrompt', () => {
       expect(first).toContain(week.gate);
       expect(first).toContain(week.mission.deliverable.title);
       expect(first).toContain('DO NOT COMPLETE THE WORK FOR ME');
-      expect(first).toContain('Teach before you test');
-      expect(first).toContain('CONCEPTS TO TEACH BEFORE MY ATTEMPT');
+      expect(first).toContain('interactive client simulation');
+      expect(first).toContain('Use exactly one story beat per turn');
       expect(first).toContain('case-and-concept readback');
-      expect(first).toContain('## INTERMEZZO PROTOCOL');
-      expect(first).toContain('Teach exactly one concept per turn');
-      expect(first).toContain('The first response must only orient me');
+      expect(first).toContain('150–220 words');
+      expect(first).toContain('**Giliran lo:**');
+      expect(first).toContain('Do not reveal the concept name before I answer');
       expect(first).toContain('## USER CONTROLS');
-      expect(first).not.toContain('Explain the concept in Bahasa Indonesia with a definition');
+      expect(first).toContain('ulang adegan');
+      expect(first).not.toContain('## INTERMEZZO PROTOCOL');
+      expect(first).not.toContain('Analogi:');
+      expect(first).not.toMatch(/\\$/m);
       for (const heading of requiredHeadings) expect(first).toContain(heading);
     }
   });
@@ -56,11 +62,22 @@ describe('buildMissionPrompt', () => {
     expect(prompt).toContain('Do not rewrite the final artifact for me.');
     expect(prompt).toContain('/cases/regularag/interview-notes.md');
     expect(prompt).toContain('Problem before solution');
-    expect(prompt).toContain('workflow mapping');
-    expect(prompt).toContain('Arti: Peta urutan kerja');
-    expect(prompt).toContain('Di kasus ini: Untuk RegulaRAG');
-    expect(prompt).toContain('Waspada: Menggambar fitur aplikasi');
-    expect(prompt).toContain('Keep each intermezzo under 70 words');
+    expect(prompt).toContain('BEAT 1 — Satu pertanyaan, banyak tempat mencari');
+    expect(prompt).toContain('Concept to reveal only after an adequate learner answer: workflow mapping');
+    expect(prompt).toContain('Decision question: Informasi dan langkah apa yang perlu lo catat');
+    expect(prompt).toContain('Do not reveal the concept, explain terminology, or request the deliverable.');
+  });
+
+  it('keeps case continuity across discovery, delivery, and career weeks', () => {
+    const invoicePrompt = buildMissionPrompt(roadmapWeeks[8]);
+    expect(invoicePrompt).toContain('InvoiceOps Agent');
+    expect(invoicePrompt).toContain('BEAT 1 — Invoice yang berpindah tanpa jejak terpadu');
+
+    for (const weekNumber of [14, 15, 16]) {
+      const prompt = buildMissionPrompt(roadmapWeeks[weekNumber - 1]);
+      expect(prompt).toContain('RegulaRAG ID');
+      expect(prompt).toContain('InvoiceOps Agent');
+    }
   });
 
   it('uses an explicit preview origin without losing prompt purity', () => {

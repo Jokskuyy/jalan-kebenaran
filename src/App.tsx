@@ -372,11 +372,11 @@ function App() {
 
                     <div className="mission-start">
                       <span>START HERE · BELUM PERLU JAWABAN FINAL</span>
-                      <strong>AI akan mengajar dulu, lalu menguji pemahaman lo sebelum mereview draft.</strong>
+                      <strong>AI akan membawa lo masuk ke adegan client, menunggu keputusan lo, lalu membedah konsepnya.</strong>
                       <p>
-                        Buka dossier <b>{week.mission.caseIds.map((caseId) => caseDossiers[caseId].title).join(' + ')}</b>,
-                        baca evidence, dan buat draft <b>{week.mission.deliverable.title}</b>. Yang nanti ditempel ke chat
-                        adalah draft artifact lo—bukan jawaban langsung ke client. Lesson detail konsep juga ikut terbawa saat klik <b>Copy full mission</b>.
+                        Buka Mission Kit <b>{week.mission.caseIds.map((caseId) => caseDossiers[caseId].title).join(' + ')}</b>{' '}
+                        untuk melihat context dan evidence. Klik <b>Copy full mission</b>, jawab satu keputusan per adegan,
+                        lalu buat draft <b>{week.mission.deliverable.title}</b> setelah simulasi selesai.
                       </p>
                     </div>
 

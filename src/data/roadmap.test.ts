@@ -31,6 +31,17 @@ describe('roadmap data', () => {
       expect(week.mission.starterAssets.length).toBeGreaterThanOrEqual(2);
       expect(week.mission.rubric.length).toBeGreaterThanOrEqual(3);
       expect(week.mission.deliverable.sections.length).toBeGreaterThanOrEqual(4);
+      expect(week.mission.story.learnerRole.trim()).not.toBe('');
+      expect(week.mission.story.opening.trim()).not.toBe('');
+      expect(week.mission.story.beats).toHaveLength(week.concepts.length);
+      expect(week.mission.story.beats.map((beat) => beat.concept)).toEqual(week.concepts);
+
+      for (const beat of week.mission.story.beats) {
+        expect(beat.title.trim()).not.toBe('');
+        expect(beat.situation.trim()).not.toBe('');
+        expect(beat.decisionQuestion.trim()).not.toBe('');
+        expect(beat.title.toLowerCase()).not.toContain(beat.concept.toLowerCase());
+      }
     }
   });
 
