@@ -10,9 +10,13 @@ import {
   type RoadmapWeek,
 } from './data/roadmap';
 import { WeeklyMissionDossier } from './components/WeeklyMissionDossier';
+import { MissionDebrief } from './components/MissionDebrief';
+import { FinalReadinessReport } from './components/FinalReadinessReport';
 import { caseDossiers } from './data/missions';
 import { useProgress } from './hooks/useProgress';
+import { useAssessments } from './hooks/useAssessments';
 import { copyText } from './lib/clipboard';
+import { buildFinalReport, buildReportMarkdown, calculateWeeklyScore } from './lib/assessment';
 import { buildMissionPrompt } from './lib/missionPrompt';
 
 const applicationCadence = [
@@ -62,8 +66,16 @@ function App() {
     toggleEvidence,
     reset,
   } = useProgress();
+  const {
+    assessments,
+    saveAssessment,
+    deleteAssessment,
+    reset: resetAssessments,
+  } = useAssessments();
   const [copiedWeekId, setCopiedWeekId] = useState<string | null>(null);
   const [manualPrompt, setManualPrompt] = useState<ManualPrompt | null>(null);
+  const [reportCopied, setReportCopied] = useState(false);
+  const [manualReport, setManualReport] = useState<string | null>(null);
   const [liveMessage, setLiveMessage] = useState('');
 
   const completedTasks = useMemo(() => new Set(state.completedTaskIds), [state.completedTaskIds]);
@@ -71,6 +83,10 @@ function App() {
   const completedEvidence = useMemo(
     () => new Set(state.completedEvidenceIds),
     [state.completedEvidenceIds],
+  );
+  const readinessReport = useMemo(
+    () => buildFinalReport({ progress: state, assessments }),
+    [state, assessments],
   );
 
   const currentWeekData = roadmapWeeks[currentWeek - 1];
@@ -135,11 +151,30 @@ function App() {
     setLiveMessage(`Clipboard tidak tersedia. Full mission minggu ${week.week} ditampilkan untuk disalin manual.`);
   }
 
+  async function copyFinalReport() {
+    const report = buildReportMarkdown(readinessReport);
+    const result = await copyText(report);
+
+    if (result !== 'failed') {
+      setReportCopied(true);
+      setManualReport(null);
+      setLiveMessage('Final After-Action Report disalin sebagai Markdown.');
+      window.setTimeout(() => setReportCopied(false), 1800);
+      return;
+    }
+
+    setManualReport(report);
+    setLiveMessage('Clipboard tidak tersedia. Final report ditampilkan untuk disalin manual.');
+  }
+
   function resetProgress() {
-    const confirmed = window.confirm('Hapus seluruh progres AGENT/16 di browser ini?');
+    const confirmed = window.confirm('Hapus seluruh progress dan Mission Debrief AGENT/16 di browser ini?');
     if (!confirmed) return;
     reset();
-    setLiveMessage('Seluruh progres lokal sudah direset.');
+    resetAssessments();
+    setManualPrompt(null);
+    setManualReport(null);
+    setLiveMessage('Seluruh progress dan Mission Debrief lokal sudah direset.');
   }
 
   return (
@@ -156,6 +191,7 @@ function App() {
           <a href="#roadmap">Roadmap</a>
           <a href="#labs">Project labs</a>
           <a href="#evidence">Evidence</a>
+          <a href="#debrief">Final report</a>
         </nav>
         <span className="storage-note">LOCAL-ONLY · NO ACCOUNT</span>
       </header>
@@ -340,6 +376,8 @@ function App() {
                 const gateDone = completedGates.has(week.id);
                 const weekDone = tasksDone === week.tasks.length && gateDone;
                 const isCurrent = week.week === currentWeek;
+                const assessment = assessments[week.id];
+                const debriefScore = assessment ? calculateWeeklyScore(assessment) : null;
 
                 return (
                   <article
@@ -357,6 +395,9 @@ function App() {
                         <span className="week-hours">{week.hours}</span>
                         <span className={`week-state ${weekDone ? 'done' : ''}`}>
                           {weekDone ? 'GATE PASSED' : `${tasksDone}/${week.tasks.length} TASKS`}
+                        </span>
+                        <span className={`week-debrief-state${assessment ? ' recorded' : ''}`}>
+                          {debriefScore === null ? 'NO DEBRIEF' : `DEBRIEF ${Math.round(debriefScore)}/100`}
                         </span>
                       </div>
                     </header>
@@ -435,6 +476,14 @@ function App() {
                         />
                       </section>
                     ) : null}
+
+                    <MissionDebrief
+                      week={week}
+                      assessment={assessment}
+                      onSave={saveAssessment}
+                      onDelete={() => deleteAssessment(week.id)}
+                      onStatus={setLiveMessage}
+                    />
                   </article>
                 );
               })}
@@ -568,6 +617,14 @@ function App() {
           </div>
         </section>
 
+        <FinalReadinessReport
+          report={readinessReport}
+          onCopyReport={copyFinalReport}
+          copyLabel={reportCopied ? 'Report copied ✓' : 'Copy report as Markdown'}
+          manualReport={manualReport}
+          onCloseManualReport={() => setManualReport(null)}
+        />
+
         <section className="closing-section section-shell">
           <div>
             <p className="eyebrow">THE FINISH LINE</p>
@@ -581,7 +638,7 @@ function App() {
         <div className="section-shell footer-grid">
           <div>
             <span className="brand-mark">A/16</span>
-            <p>Progress disimpan hanya di browser ini melalui localStorage. Tidak ada akun, backend, database, API key, atau data client.</p>
+            <p>Progress dan Mission Debrief disimpan hanya di browser ini melalui localStorage. Tidak ada akun, backend, database, API key, atau data client.</p>
           </div>
           <div>
             <p><strong>PORTFOLIO DISCLAIMER</strong><br />Project labs memakai data publik atau sintetis. Benchmark harus dilabeli sebagai simulasi.</p>

@@ -100,6 +100,24 @@ function storyGuide(week: RoadmapWeek) {
   }).join('\n\n');
 }
 
+function assessmentTemplate(week: RoadmapWeek) {
+  return JSON.stringify({
+    kind: 'agent16-weekly-assessment',
+    schemaVersion: 1,
+    rubricRevision: 1,
+    weekId: week.id,
+    weekNumber: week.week,
+    rubricResults: week.mission.rubric.map((item) => ({
+      rubricId: item.id,
+      score: 0,
+      finding: '[Temuan spesifik dari draft dan review.]',
+      evidence: '[Evidence dari draft atau case; tulis gap bila belum ada.]',
+      nextAction: '[Satu tindakan revisi yang konkret.]',
+    })),
+    weekSummary: '[Ringkasan hasil review minggu ini.]',
+  }, null, 2);
+}
+
 export function buildMissionPrompt(
   week: RoadmapWeek,
   assetOrigin = DEFAULT_MISSION_ORIGIN,
@@ -140,7 +158,7 @@ export function buildMissionPrompt(
   ].join('\n')).join('\n');
 
   const rubricText = mission.rubric.map((item) => [
-    `- ${item.label}`,
+    `- [${item.id}] ${item.label}`,
     `  Score 2 when: ${item.passCondition}`,
   ].join('\n')).join('\n');
 
@@ -231,7 +249,19 @@ export function buildMissionPrompt(
     '3. After my answer: if incomplete, give one hint and repeat the decision. If adequate, give 2–4 sentences of feedback, reveal the concept and warning, then present the next scene.',
     '4. After the final adequate answer, reveal its concept and ask for my three-bullet case-and-concept readback. Do not ask for the deliverable yet.',
     '5. After the readback, invite my own draft or partial attempt. Ask no more than five discovery questions after I share it.',
-    '6. Review and score only after receiving my attempt. Return evidence gaps, rubric scores, and a prioritized revision checklist.',
+    '6. Review and score only after receiving my attempt. Return evidence gaps, rubric scores, and a prioritized revision checklist, then follow the Mission Debrief Receipt contract below.',
+    '',
+    '## MISSION DEBRIEF RECEIPT — ONLY AFTER REVIEW',
+    'Use this contract only after you have reviewed my draft. Complete the story beats, readback, draft submission, any needed discovery questions, and the human-readable review first.',
+    'Never emit the assessment in the first response, during story beats, hints, concept debriefs, readback, or discovery questions, or before reviewing my draft.',
+    'After the human-readable review, emit exactly one assessment block. Emit a fresh assessment after every later revised-draft review so the newest receipt can replace the previous one.',
+    'Replace every bracketed placeholder with concise, draft-specific Bahasa Indonesia. Replace each example score 0 with the earned integer 0, 1, or 2; do not default every rubric to 0. Scores must match the human-readable rubric review.',
+    'Keep every listed rubricId exactly once and in the listed order. Do not add, remove, rename, or duplicate fields or rubric results.',
+    'Do not add an overall score, readiness score, or capability classification. The website calculates all derived results locally.',
+    'Return raw valid JSON between the marker lines exactly as shown. Do not wrap the JSON in a Markdown code fence and do not write commentary inside the markers.',
+    'AGENT16_ASSESSMENT_V1_START',
+    assessmentTemplate(week),
+    'AGENT16_ASSESSMENT_V1_END',
     '',
     '## USER CONTROLS',
     'If I say “jelaskan [term]”, explain only that term in at most three bullets. If I say “beri hint”, give one directional hint without writing the answer. If I say “ulang adegan”, restate the current scene more simply without adding facts. If I say “lanjut”, move to the next eligible step without inventing my answer. If I say “stop”, wait for my next instruction.',
