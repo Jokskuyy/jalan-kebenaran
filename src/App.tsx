@@ -27,12 +27,12 @@ const applicationCadence = [
 ];
 
 const weeklyFlow = [
-  ['01', 'Learn'],
-  ['02', 'Inspect client evidence'],
-  ['03', 'Attempt solo'],
-  ['04', 'AI review'],
-  ['05', 'Revise'],
-  ['06', 'Pass gate'],
+  ['01', 'Understand'],
+  ['02', 'See one step'],
+  ['03', 'Guided try'],
+  ['04', 'Independent try'],
+  ['05', 'Build draft'],
+  ['06', 'Review'],
   ['07', 'Ship'],
 ];
 
@@ -142,13 +142,13 @@ function App() {
     if (result !== 'failed') {
       setCopiedWeekId(week.id);
       setManualPrompt(null);
-      setLiveMessage(`Full mission minggu ${week.week} disalin ke clipboard.`);
+      setLiveMessage(`Guided mission minggu ${week.week} disalin. Tempel ke chat AI baru untuk mulai belajar.`);
       window.setTimeout(() => setCopiedWeekId(null), 1800);
       return;
     }
 
     setManualPrompt({ weekId: week.id, weekNumber: week.week, text: prompt });
-    setLiveMessage(`Clipboard tidak tersedia. Full mission minggu ${week.week} ditampilkan untuk disalin manual.`);
+    setLiveMessage(`Clipboard tidak tersedia. Guided mission minggu ${week.week} ditampilkan untuk disalin manual.`);
   }
 
   async function copyFinalReport() {
@@ -304,8 +304,8 @@ function App() {
             <p className="eyebrow">HOW TO RUN EVERY WEEK</p>
             <h2 id="weekly-system-title">Jangan mulai dari prompt kosong.</h2>
             <p>
-              Mulai dari evidence, kerjakan versi pertama sendiri, lalu gunakan AI sebagai coach dan
-              client simulator. Artifact final tetap hasil keputusan dan revisi lo.
+              AI menjelaskan konsep, memperagakan satu langkah dari kasus yang sama, lalu mengurangi
+              bantuan sampai lo bisa mencoba sendiri. Artifact final tetap hasil keputusan dan revisi lo.
             </p>
           </div>
 
@@ -330,7 +330,7 @@ function App() {
 
           <div className="coach-boundary">
             <span>AI COACH BOUNDARY</span>
-            <p>AI boleh bertanya, mengkritik, menguji failure mode, dan memberi rubric score. AI tidak boleh mengerjakan final deliverable sebelum lo punya draft.</p>
+            <p>AI boleh memperagakan satu langkah kecil, bertanya, mengkritik, menguji failure mode, dan memberi rubric score. AI tidak boleh menulis draft atau final deliverable untuk lo.</p>
           </div>
         </section>
 
@@ -413,15 +413,41 @@ function App() {
 
                     <div className="mission-start">
                       <span>START HERE · BELUM PERLU JAWABAN FINAL</span>
-                      <strong>AI akan membawa lo masuk ke adegan client, menunggu keputusan lo, lalu membedah konsepnya.</strong>
+                      <strong>AI menjelaskan konsep, menunjukkan satu langkah, lalu mendampingi lo sampai bisa mencoba sendiri.</strong>
                       <p>
                         Buka Mission Kit <b>{week.mission.caseIds.map((caseId) => caseDossiers[caseId].title).join(' + ')}</b>{' '}
-                        untuk melihat context dan evidence. Klik <b>Copy full mission</b>, jawab satu keputusan per adegan,
-                        lalu buat draft <b>{week.mission.deliverable.title}</b> setelah simulasi selesai.
+                        untuk melihat context dan evidence. Klik <b>Copy guided mission</b>, tempel ke chat AI baru,
+                        lalu ikuti guided try sebelum membuat draft <b>{week.mission.deliverable.title}</b>.
                       </p>
                     </div>
 
                     <WeeklyMissionDossier week={week} />
+
+                    <div className="mission-launch">
+                      <div>
+                        <span>START COACHING LOOP</span>
+                        <strong>Salin satu prompt mandiri, lalu tempel ke chat AI baru.</strong>
+                      </div>
+                      <button className="copy-button" type="button" onClick={() => copyMission(week)}>
+                        {copiedWeekId === week.id ? 'Guided mission disalin ✓' : 'Copy guided mission'}
+                      </button>
+                    </div>
+
+                    {manualPrompt?.weekId === week.id ? (
+                      <section className="manual-copy" aria-labelledby={`${week.id}-manual-copy`}>
+                        <div>
+                          <span>CLIPBOARD FALLBACK</span>
+                          <h4 id={`${week.id}-manual-copy`}>Salin guided mission W{String(manualPrompt.weekNumber).padStart(2, '0')} secara manual.</h4>
+                          <button type="button" onClick={() => setManualPrompt(null)}>Tutup ×</button>
+                        </div>
+                        <textarea
+                          readOnly
+                          value={manualPrompt.text}
+                          onFocus={(event) => event.currentTarget.select()}
+                          aria-label={`Guided mission minggu ${manualPrompt.weekNumber}`}
+                        />
+                      </section>
+                    ) : null}
 
                     <div className="task-list" role="group" aria-label={`Tasks minggu ${week.week}`}>
                       {week.tasks.map((task) => (
@@ -447,10 +473,19 @@ function App() {
                       </div>
                     </footer>
 
-                    <div className="week-actions">
-                      <button className="copy-button" type="button" onClick={() => copyMission(week)}>
-                        {copiedWeekId === week.id ? 'Full mission disalin ✓' : 'Copy full mission'}
-                      </button>
+                    <MissionDebrief
+                      week={week}
+                      assessment={assessment}
+                      onSave={saveAssessment}
+                      onDelete={() => deleteAssessment(week.id)}
+                      onStatus={setLiveMessage}
+                    />
+
+                    <div className="gate-action">
+                      <div>
+                        <span>FINAL SELF-CHECK</span>
+                        <strong>Centang setelah task, evidence, dan Mission Debrief minggu ini benar-benar selesai.</strong>
+                      </div>
                       <button
                         className={`gate-button${gateDone ? ' complete' : ''}`}
                         type="button"
@@ -460,30 +495,6 @@ function App() {
                         {gateDone ? 'Gate passed ✓' : 'Tandai gate passed'}
                       </button>
                     </div>
-
-                    {manualPrompt?.weekId === week.id ? (
-                      <section className="manual-copy" aria-labelledby={`${week.id}-manual-copy`}>
-                        <div>
-                          <span>CLIPBOARD FALLBACK</span>
-                          <h4 id={`${week.id}-manual-copy`}>Salin full mission W{String(manualPrompt.weekNumber).padStart(2, '0')} secara manual.</h4>
-                          <button type="button" onClick={() => setManualPrompt(null)}>Tutup ×</button>
-                        </div>
-                        <textarea
-                          readOnly
-                          value={manualPrompt.text}
-                          onFocus={(event) => event.currentTarget.select()}
-                          aria-label={`Full mission minggu ${manualPrompt.weekNumber}`}
-                        />
-                      </section>
-                    ) : null}
-
-                    <MissionDebrief
-                      week={week}
-                      assessment={assessment}
-                      onSave={saveAssessment}
-                      onDelete={() => deleteAssessment(week.id)}
-                      onStatus={setLiveMessage}
-                    />
                   </article>
                 );
               })}

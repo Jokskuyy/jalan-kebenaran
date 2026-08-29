@@ -115,7 +115,7 @@ a { color: inherit; }
 .coach-boundary p { margin: 0; line-height: 1.45; }
 
 .roadmap-section { display: grid; grid-template-columns: 310px minmax(0, 1fr); gap: clamp(50px, 8vw, 110px); padding-block: 110px; }
-.roadmap-rail { align-self: start; position: sticky; top: 104px; border-top: 5px solid var(--teal); padding-top: 24px; }
+.roadmap-rail { min-width: 0; align-self: start; position: sticky; top: 104px; border-top: 5px solid var(--teal); padding-top: 24px; }
 .week-stamp { display: block; margin: 26px 0 8px; font: 700 clamp(68px, 8vw, 110px)/.8 'Bricolage Grotesque', sans-serif; letter-spacing: -.08em; color: transparent; -webkit-text-stroke: 1.5px var(--ink); }
 .roadmap-rail h2 { margin: 24px 0 12px; font: 700 30px/1 'Bricolage Grotesque', sans-serif; letter-spacing: -.035em; }
 .roadmap-rail > p:not(.eyebrow) { color: var(--slate); line-height: 1.55; }
@@ -125,12 +125,13 @@ a { color: inherit; }
 .roadmap-rail dt { color: var(--slate); font: 600 9px/1.4 'IBM Plex Mono', monospace; letter-spacing: .1em; }
 .roadmap-rail dd { margin: 0; font-size: 14px; font-weight: 650; }
 .rail-button { width: 100%; margin-top: 20px; cursor: pointer; }
+.roadmap-content { min-width: 0; }
 .roadmap-content .section-heading p:last-child { color: var(--slate); }
-.week-list { display: grid; gap: 22px; }
+.week-list { min-width: 0; display: grid; gap: 22px; }
 .filter-strip { display: flex; align-items: center; gap: 14px; min-height: 48px; margin: 0 0 22px; padding: 0 16px; background: #e3ece9; color: var(--slate); font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: .09em; }
 .filter-strip strong { color: var(--ink); margin-left: auto; }
 .filter-strip button { border: 0; border-left: 1px solid #b8cac4; padding-left: 14px; background: transparent; color: #087d72; cursor: pointer; font-weight: 700; }
-.week-card { position: relative; background: rgba(255,255,255,.8); border: 1px solid var(--line); content-visibility: auto; contain-intrinsic-size: 0 820px; }
+.week-card { width: 100%; min-width: 0; position: relative; background: rgba(255,255,255,.8); border: 1px solid var(--line); content-visibility: auto; contain-intrinsic-size: 0 820px; }
 .week-card.is-current { border-color: var(--teal); box-shadow: -6px 0 0 var(--teal); }
 .week-card.is-complete::after { content: 'PASSED'; position: absolute; right: -1px; top: -1px; padding: 6px 10px; background: var(--teal); color: var(--ink); font: 700 9px/1 'IBM Plex Mono', monospace; letter-spacing: .12em; }
 .week-card > header { display: grid; grid-template-columns: 72px 1fr auto; align-items: start; gap: 20px; padding: 26px; border-bottom: 1px solid var(--line); }
@@ -229,12 +230,18 @@ a { color: inherit; }
 .week-card footer > div { display: grid; gap: 7px; padding: 20px 26px; }
 .week-card footer > div + div { border-left: 1px solid var(--line); }
 .week-card footer strong { font-size: 14px; line-height: 1.35; }
-.week-actions { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); }
-.week-actions button { min-height: 48px; padding: 0 18px; border: 0; background: transparent; font: 650 11px/1 'IBM Plex Mono', monospace; cursor: pointer; }
-.week-actions button + button { border-left: 1px solid var(--line); }
-.copy-button:hover { background: #edf3f1; }
-.gate-button { color: #087d72; }
-.gate-button:hover { background: rgba(22, 184, 166, .12); }
+.mission-launch, .gate-action { display: grid; grid-template-columns: 1fr minmax(220px, auto); align-items: stretch; border-top: 1px solid var(--ink); }
+.mission-launch { background: var(--ink); color: white; }
+.mission-launch > div, .gate-action > div { display: grid; align-content: center; gap: 7px; min-width: 0; padding: 18px 26px; }
+.mission-launch span, .gate-action span { color: var(--teal); font: 700 9px/1.3 'IBM Plex Mono', monospace; letter-spacing: .1em; }
+.mission-launch strong, .gate-action strong { font: 650 15px/1.3 'Bricolage Grotesque', sans-serif; }
+.mission-launch .copy-button, .gate-action .gate-button { min-height: 56px; padding: 14px 20px; border: 0; border-left: 1px solid var(--ink); font: 700 11px/1.25 'IBM Plex Mono', monospace; cursor: pointer; }
+.mission-launch .copy-button { background: var(--teal); color: var(--ink); }
+.mission-launch .copy-button:hover { background: var(--amber); }
+.gate-action { background: #e8f2ef; }
+.gate-action span { color: #087d72; }
+.gate-action .gate-button { background: white; color: #087d72; }
+.gate-action .gate-button:hover { background: rgba(22, 184, 166, .12); }
 .gate-button.complete { background: var(--teal); color: var(--ink); }
 .manual-copy { padding: 22px 26px 26px; border-top: 1px solid var(--ink); background: #fff2d0; }
 .manual-copy > div { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 8px 18px; margin-bottom: 14px; }
@@ -310,8 +317,8 @@ a { color: inherit; }
 .skill-heading { display: grid; grid-template-columns: 1.1fr .9fr; column-gap: clamp(40px, 8vw, 110px); align-items: end; }
 .skill-heading .eyebrow { grid-column: 1 / -1; }
 .skill-heading p:last-child { color: var(--slate); }
-.skill-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 50px; background: #a9beb8; border: 1px solid #a9beb8; }
-.skill-card { min-height: 430px; display: flex; flex-direction: column; padding: 26px; background: var(--paper); content-visibility: auto; contain-intrinsic-size: 0 430px; }
+.skill-grid { min-width: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 50px; background: #a9beb8; border: 1px solid #a9beb8; }
+.skill-card { width: 100%; min-width: 0; min-height: 430px; display: flex; flex-direction: column; padding: 26px; background: var(--paper); content-visibility: auto; contain-intrinsic-size: 0 430px; }
 .skill-card header { display: flex; justify-content: space-between; align-items: center; color: var(--slate); font: 600 9px/1 'IBM Plex Mono', monospace; letter-spacing: .1em; }
 .skill-card header em { font-style: normal; }
 .skill-card.support { background: var(--amber); }
@@ -551,8 +558,8 @@ a { color: inherit; }
   .task-list label { padding-inline: 20px; }
   .week-card footer { grid-template-columns: 1fr; }
   .week-card footer > div + div { border-left: 0; border-top: 1px solid var(--line); }
-  .week-actions { grid-template-columns: 1fr; }
-  .week-actions button + button { border-left: 0; border-top: 1px solid var(--line); }
+  .mission-launch, .gate-action { grid-template-columns: 1fr; }
+  .mission-launch .copy-button, .gate-action .gate-button { min-height: 54px; border-left: 0; border-top: 1px solid var(--ink); }
   .manual-copy { padding-inline: 20px; }
   .manual-copy > div { grid-template-columns: 1fr; }
   .manual-copy button { grid-column: 1; grid-row: auto; justify-self: start; }

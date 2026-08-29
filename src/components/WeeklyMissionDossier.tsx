@@ -34,11 +34,11 @@ export function WeeklyMissionDossier({ week }: WeeklyMissionDossierProps) {
             </div>
             <div>
               <dt>YOUR FIRST MOVE</dt>
-              <dd>Buka evidence dan starter brief, lalu klik Copy full mission. Jawab satu keputusan per adegan.</dd>
+              <dd>Buka evidence dan starter brief, lalu klik Copy guided mission dan tempel ke chat AI baru.</dd>
             </div>
             <div>
               <dt>AI WILL</dt>
-              <dd>Memainkan client dan coach, memberi satu adegan per giliran, lalu menunggu jawaban lo.</dd>
+              <dd>Menjelaskan konsep, memperagakan satu langkah kasus, meminta micro-answer, lalu mengurangi bantuan.</dd>
             </div>
             <div>
               <dt>DONE WHEN</dt>
@@ -57,8 +57,8 @@ export function WeeklyMissionDossier({ week }: WeeklyMissionDossierProps) {
           </summary>
           <div className="mission-panel__content">
             <div className="teach-first">
-              <strong>STORY-FIRST PROTOCOL</strong>
-              <p>AI membawa lo ke satu adegan client, meminta keputusan, lalu baru memberi nama konsep yang barusan lo pakai. Satu adegan per giliran; AI tidak melanjutkan sebelum lo menjawab.</p>
+              <strong>GUIDED LEARNING PROTOCOL</strong>
+              <p>AI menyebut dan menjelaskan konsep, menunjukkan satu partial worked step dari kasus yang sama, lalu meminta lo melanjutkan satu langkah sebelum mencoba keputusan utuh secara mandiri.</p>
               <div>{week.concepts.map((concept) => <span key={concept}>{concept}</span>)}</div>
             </div>
             <div className="resource-list">
@@ -106,7 +106,7 @@ export function WeeklyMissionDossier({ week }: WeeklyMissionDossierProps) {
           <summary>
             <span>03</span>
             <div>
-              <p>BUILD · ATTEMPT SOLO</p>
+              <p>BUILD · DRAFT YOUR OWN</p>
               <h4 id={`${week.id}-build`}>{week.mission.deliverable.title}</h4>
             </div>
           </summary>
@@ -145,7 +145,7 @@ export function WeeklyMissionDossier({ week }: WeeklyMissionDossierProps) {
             </div>
             <div className="coach-rule">
               <strong>COACH PROTOCOL</strong>
-              <p>AI wajib meminta draft lo dulu, bertanya maksimal lima kali, memberi skor dan revision checklist, serta tidak menulis artifact final untuk lo.</p>
+              <p>AI boleh memperagakan satu langkah kecil, tetapi wajib menunggu draft lo sebelum review, bertanya maksimal lima kali, memberi skor dan revision checklist, serta tidak menulis artifact final.</p>
             </div>
           </div>
         </details>

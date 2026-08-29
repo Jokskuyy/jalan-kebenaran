@@ -22,6 +22,7 @@ describe('roadmap data', () => {
     expect(roadmapWeeks).toHaveLength(16);
     expect(storyBeats).toHaveLength(48);
     expect(new Set(storyBeats.map((beat) => normalizeStoryText(beat.answerFrame))).size).toBe(48);
+    expect(new Set(storyBeats.map((beat) => normalizeStoryText(beat.guided.microQuestion))).size).toBe(48);
     expect(roadmapWeeks.map((week) => week.week)).toEqual(
       Array.from({ length: 16 }, (_, index) => index + 1),
     );
@@ -45,6 +46,15 @@ describe('roadmap data', () => {
 
       for (const beat of week.mission.story.beats) {
         const answerSlots = beat.answerFrame.split('→').map((slot) => slot.trim());
+        const microSlots = beat.guided.microAnswerFrame.split('→').map((slot) => slot.trim());
+        const meaningSentences = beat.guided.meaning.split(/[.!?]+/).filter((part) => part.trim());
+        const guidedText = [
+          beat.guided.meaning,
+          ...beat.guided.workedStep,
+          beat.guided.microQuestion,
+          beat.guided.microAnswerFrame,
+          beat.guided.warning,
+        ].join(' ');
         expect(beat.title.trim()).not.toBe('');
         expect(beat.situation.trim()).not.toBe('');
         expect(beat.decisionQuestion.trim()).not.toBe('');
@@ -54,9 +64,29 @@ describe('roadmap data', () => {
         expect(answerSlots.length).toBeGreaterThanOrEqual(3);
         expect(answerSlots.length).toBeLessThanOrEqual(5);
         expect(answerSlots.every(Boolean)).toBe(true);
+        expect(beat.guided.meaning.trim()).not.toBe('');
+        expect(meaningSentences.length).toBeGreaterThanOrEqual(1);
+        expect(meaningSentences.length).toBeLessThanOrEqual(2);
+        expect(beat.guided.workedStep.length).toBeGreaterThanOrEqual(2);
+        expect(beat.guided.workedStep.length).toBeLessThanOrEqual(5);
+        expect(beat.guided.workedStep.every((item) => item.trim().length > 0)).toBe(true);
+        expect(beat.guided.microQuestion.trim()).not.toBe('');
+        expect(beat.guided.microAnswerFrame.trim()).not.toBe('');
+        expect(beat.guided.microAnswerFrame).not.toContain('\n');
+        expect(microSlots.length).toBeGreaterThanOrEqual(3);
+        expect(microSlots.length).toBeLessThanOrEqual(5);
+        expect(microSlots.every(Boolean)).toBe(true);
+        expect(normalizeStoryText(beat.guided.microAnswerFrame)).not.toBe(normalizeStoryText(beat.answerFrame));
+        expect(beat.guided.warning.trim()).not.toBe('');
         expect(normalizeStoryText(beat.title)).not.toContain(normalizeStoryText(beat.concept));
         expect(normalizeStoryText(beat.answerFrame)).not.toContain(normalizeStoryText(beat.concept));
         expect(beat.answerFrame).not.toMatch(/\b(contoh|misalnya|jawaban (?:final|jadi|benar))\b/i);
+
+        if (week.week <= 8) {
+          expect(guidedText).not.toMatch(/\b(InvoiceOps|invoice|ERP|vendor|payment)\b/i);
+        } else if (week.week <= 13) {
+          expect(guidedText).not.toMatch(/\b(RegulaRAG|regulasi|SOP|compliance|citation)\b/i);
+        }
       }
     }
   });
