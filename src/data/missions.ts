@@ -29,10 +29,19 @@ export type MissionDeliverable = {
   sections: string[];
 };
 
+export type GuidedScaffold = {
+  meaning: string;
+  workedStep: string[];
+  microQuestion: string;
+  microAnswerFrame: string;
+  warning: string;
+};
+
 export type StoryBeat = {
   concept: string;
   title: string;
   situation: string;
+  guided: GuidedScaffold;
   decisionQuestion: string;
   answerFrame: string;
 };
@@ -410,8 +419,19 @@ function beat(
   situation: string,
   decisionQuestion: string,
   answerFrame: string,
+  guided: GuidedScaffold,
 ): StoryBeat {
-  return { concept, title, situation, decisionQuestion, answerFrame };
+  return { concept, title, situation, guided, decisionQuestion, answerFrame };
+}
+
+function guide(
+  meaning: string,
+  workedStep: string[],
+  microQuestion: string,
+  microAnswerFrame: string,
+  warning: string,
+): GuidedScaffold {
+  return { meaning, workedStep, microQuestion, microAnswerFrame, warning };
 }
 
 function story(
@@ -427,144 +447,386 @@ const missionStories: Record<number, MissionStory> = {
     'junior solution architect yang baru bergabung di discovery RegulaRAG',
     'Lo masuk ke tim sebelum solusi dipilih. Tugas lo adalah memahami pekerjaan compliance sebagaimana berlangsung sekarang, bukan membenarkan permintaan chatbot.',
     [
-      beat('workflow mapping', 'Satu pertanyaan, banyak tempat mencari', 'Seorang analyst menerima pertanyaan dari shared inbox atau ticket queue. Ia mencari lewat Drive, bookmark pribadi, dan kadang bertanya ke senior analyst sebelum jawaban dikirim; sample menunjukkan 15–90 menit dan pencatatan waktunya belum konsisten.', 'Informasi dan langkah apa yang perlu lo catat dari satu tiket agar bisa menemukan di mana waktu hilang?', 'hal yang ingin diamati → catatan yang dikumpulkan → alasan catatan itu berguna'),
-      beat('stakeholder', 'Semua peduli, tetapi tidak semua memutuskan', 'Operations ingin jawaban lebih cepat, analyst menjalankan pekerjaan, dan Legal wajib menyetujui interpretasi berisiko. Senior analyst sering dimintai bantuan, sementara owner cycle time dan owner versi dokumen belum terverifikasi.', 'Bagaimana lo membedakan primary user, process owner, risk approver, dan knowledge owner tanpa menebak jabatan?', 'pihak yang terlibat → bukti peran dalam proses → jenis keputusan atau tanggung jawab → hal yang masih perlu diverifikasi'),
-      beat('baseline KPI', 'Angka satu jam yang belum menjadi baseline', 'Manager menyebut jawaban biasanya sekitar satu jam, tetapi workflow sample bervariasi 15–90 menit dan source attachment tidak selalu ada. Belum ada periode, denominator, atau owner data yang disepakati.', 'Pilih satu KPI awal: bagaimana formula, unit, sample, sumber, owner, dan confidence-nya harus ditulis?', 'ukuran yang dipilih → cara hitung dan unit → cakupan sampel serta sumber data → pemilik data → tingkat keyakinan'),
+      beat('workflow mapping', 'Satu pertanyaan, banyak tempat mencari', 'Seorang analyst menerima pertanyaan dari shared inbox atau ticket queue. Ia mencari lewat Drive, bookmark pribadi, dan kadang bertanya ke senior analyst sebelum jawaban dikirim; sample menunjukkan 15–90 menit dan pencatatan waktunya belum konsisten.', 'Informasi dan langkah apa yang perlu lo catat dari satu tiket agar bisa menemukan di mana waktu hilang?', 'hal yang ingin diamati → catatan yang dikumpulkan → alasan catatan itu berguna', guide(
+        'Workflow mapping adalah peta urutan kerja dari pemicu sampai hasil.',
+        [
+          'Pelaku: compliance analyst.',
+          'Tindakan: menerima dan membaca pertanyaan.',
+          'Sumber/tool: shared inbox atau ticket queue.',
+          'Waktu: catat waktu masuk dan saat mulai dibaca.',
+          'Belum diketahui: berapa lama tiket menunggu sebelum diambil.',
+        ],
+        'Setelah analyst membaca pertanyaan, tindakan berikutnya apa yang terlihat?',
+        'pelaku → tindakan → sumber/tool → waktu yang perlu dicatat → hal yang belum diketahui',
+        'Catat pekerjaan client yang berlangsung sekarang, bukan fitur chatbot.',
+      )),
+      beat('stakeholder', 'Semua peduli, tetapi tidak semua memutuskan', 'Operations ingin jawaban lebih cepat, analyst menjalankan pekerjaan, dan Legal wajib menyetujui interpretasi berisiko. Senior analyst sering dimintai bantuan, sementara owner cycle time dan owner versi dokumen belum terverifikasi.', 'Bagaimana lo membedakan primary user, process owner, risk approver, dan knowledge owner tanpa menebak jabatan?', 'pihak yang terlibat → bukti peran dalam proses → jenis keputusan atau tanggung jawab → hal yang masih perlu diverifikasi', guide(
+        'Bedakan setiap pihak dari tindakan, keputusan, risiko, atau hasil yang benar-benar menjadi tanggung jawabnya.',
+        [
+          'Analyst terbukti menjalankan pencarian dan menyusun jawaban; itu bukti penggunaan proses.',
+          'Legal terbukti wajib menyetujui interpretasi berisiko; itu bukti kewenangan risiko.',
+          'Owner cycle time dan versi dokumen masih perlu diverifikasi, bukan ditebak dari jabatan.',
+        ],
+        'Dari evidence ini, siapa yang menjalankan pekerjaan dan siapa yang memutuskan interpretasi berisiko?',
+        'pihak → tindakan yang terlihat → keputusan yang dimiliki → bukti dari kasus',
+        'Jangan menganggap requester, pengguna, approver, dan pemilik keputusan adalah pihak yang sama.',
+      )),
+      beat('baseline KPI', 'Angka satu jam yang belum menjadi baseline', 'Manager menyebut jawaban biasanya sekitar satu jam, tetapi workflow sample bervariasi 15–90 menit dan source attachment tidak selalu ada. Belum ada periode, denominator, atau owner data yang disepakati.', 'Pilih satu KPI awal: bagaimana formula, unit, sample, sumber, owner, dan confidence-nya harus ditulis?', 'ukuran yang dipilih → cara hitung dan unit → cakupan sampel serta sumber data → pemilik data → tingkat keyakinan', guide(
+        'Ukuran kondisi sekarang perlu formula, unit, cakupan data, sumber, pemilik, dan tingkat keyakinan yang jelas.',
+        [
+          'Perkiraan “sekitar satu jam” berasal dari manager, jadi belum cukup sebagai angka final.',
+          'Sample menunjukkan rentang 15–90 menit, tetapi periode dan denominator belum disepakati.',
+          'Mulai dari satu hal terukur: durasi total satu tiket dari masuk sampai jawaban dikirim.',
+        ],
+        'Kalau memilih durasi total satu tiket, bagaimana lo menulis formula dan unitnya?',
+        'event mulai → event selesai → cara hitung → unit',
+        'Jangan menulis target “lebih cepat” tanpa baseline, denominator, sumber, dan pemilik data.',
+      )),
     ],
   ),
   2: story(
     'junior solution architect yang harus menilai apakah RegulaRAG benar-benar membutuhkan agent',
     'Problem brief sudah tersedia. Sekarang lo harus menahan dorongan memilih teknologi sebelum membandingkan pilihan yang lebih sederhana.',
     [
-      beat('agent vs workflow', 'Chatbot bukan satu-satunya jawaban', 'Client meminta chatbot, tetapi mayoritas pekerjaan adalah menemukan policy yang tepat dan menampilkan sumber. Sebagian langkah mengikuti aturan tetap; hanya bagian tertentu yang mungkin membutuhkan keputusan dinamis.', 'Bagian mana yang cukup dijalankan sebagai rules, search, atau workflow, dan bagian mana yang benar-benar membutuhkan keputusan agent?', 'bagian pekerjaan yang dinilai → pola atau ketidakpastian yang terlihat → pendekatan paling sederhana yang memadai → alasan dan batas penggunaannya'),
-      beat('RAG fit', 'Jawaban harus membawa bukti', 'Corpus RegulaRAG berisi regulasi publik dan SOP sintetis yang berubah setiap bulan. Client membutuhkan sumber, sedangkan interpretasi dan exception tetap bukan kewenangan sistem.', 'Outcome apa yang layak dibantu retrieval dan generation, serta bukti minimum apa yang harus menyertai jawaban?', 'hasil yang ingin dibantu → sumber yang perlu ditemukan → bukti minimum pada respons → kondisi ketika sistem tidak boleh menjawab'),
-      beat('human boundary', 'Pertanyaan yang tidak boleh diselesaikan sendiri', 'Sebuah pertanyaan dapat meminta interpretasi berisiko atau membahas policy exception. Sistem boleh mengumpulkan evidence, tetapi approval tetap berada pada manusia yang berwenang.', 'Pada titik mana sistem harus pause, evidence apa yang ditampilkan, dan siapa yang boleh menyetujui kelanjutannya?', 'pemicu penghentian → informasi yang diserahkan untuk diperiksa → pihak yang berwenang memutuskan → kondisi untuk melanjutkan'),
+      beat('agent vs workflow', 'Chatbot bukan satu-satunya jawaban', 'Client meminta chatbot, tetapi mayoritas pekerjaan adalah menemukan policy yang tepat dan menampilkan sumber. Sebagian langkah mengikuti aturan tetap; hanya bagian tertentu yang mungkin membutuhkan keputusan dinamis.', 'Bagian mana yang cukup dijalankan sebagai rules, search, atau workflow, dan bagian mana yang benar-benar membutuhkan keputusan agent?', 'bagian pekerjaan yang dinilai → pola atau ketidakpastian yang terlihat → pendekatan paling sederhana yang memadai → alasan dan batas penggunaannya', guide(
+        'Langkah yang tetap dapat dijalankan secara terprediksi, sedangkan keputusan dinamis baru dibutuhkan ketika jalurnya bergantung pada input yang belum pasti.',
+        [
+          'Menemukan policy yang tepat dan menampilkan sumber adalah outcome berulang dengan evidence yang dikenal.',
+          'Interpretasi dan exception tetap menjadi keputusan manusia, bukan sistem.',
+          'Celah yang perlu diuji adalah apakah ada langkah yang benar-benar harus memilih jalur secara dinamis.',
+        ],
+        'Untuk langkah menemukan policy aktif, apakah pendekatan sederhana sudah cukup atau perlu keputusan dinamis?',
+        'langkah → ketidakpastian input → pendekatan paling sederhana → alasan',
+        'Jangan memakai keputusan dinamis untuk alur tetap yang lebih mudah diuji dengan aturan.',
+      )),
+      beat('RAG fit', 'Jawaban harus membawa bukti', 'Corpus RegulaRAG berisi regulasi publik dan SOP sintetis yang berubah setiap bulan. Client membutuhkan sumber, sedangkan interpretasi dan exception tetap bukan kewenangan sistem.', 'Outcome apa yang layak dibantu retrieval dan generation, serta bukti minimum apa yang harus menyertai jawaban?', 'hasil yang ingin dibantu → sumber yang perlu ditemukan → bukti minimum pada respons → kondisi ketika sistem tidak boleh menjawab', guide(
+        'Pendekatan ini membantu menyusun respons dari evidence yang perlu ditemukan kembali, bukan mengambil keputusan hukum.',
+        [
+          'Corpus berubah setiap bulan dan client membutuhkan sumber pada jawaban.',
+          'Sistem dapat dibatasi untuk menemukan passage relevan dan membawanya ke respons.',
+          'Interpretasi dan policy exception tetap berada di luar kewenangan sistem.',
+        ],
+        'Untuk satu jawaban faktual, outcome apa yang boleh dibantu dan bukti lokasi apa yang harus terlihat?',
+        'outcome yang dibantu → identitas sumber → lokasi evidence → kondisi berhenti',
+        'Jangan menganggap evidence yang ditemukan otomatis membuat jawaban benar atau mutakhir.',
+      )),
+      beat('human boundary', 'Pertanyaan yang tidak boleh diselesaikan sendiri', 'Sebuah pertanyaan dapat meminta interpretasi berisiko atau membahas policy exception. Sistem boleh mengumpulkan evidence, tetapi approval tetap berada pada manusia yang berwenang.', 'Pada titik mana sistem harus pause, evidence apa yang ditampilkan, dan siapa yang boleh menyetujui kelanjutannya?', 'pemicu penghentian → informasi yang diserahkan untuk diperiksa → pihak yang berwenang memutuskan → kondisi untuk melanjutkan', guide(
+        'Batas manusia menetapkan keputusan atau tindakan mana yang tidak boleh diselesaikan sistem sendiri.',
+        [
+          'Pemicu yang sudah diketahui adalah permintaan interpretasi berisiko atau policy exception.',
+          'Sistem boleh mengumpulkan evidence sebelum berhenti.',
+          'Kelanjutan tetap membutuhkan keputusan dari manusia yang berwenang.',
+        ],
+        'Saat permintaan berisi interpretasi berisiko, apa yang dilakukan sistem dan apa yang perlu dilihat reviewer?',
+        'pemicu → tindakan sistem → evidence untuk reviewer → keputusan manusia',
+        'Jangan memakai “human in the loop” sebagai slogan tanpa titik berhenti dan kewenangan yang jelas.',
+      )),
     ],
   ),
   3: story(
     'junior AI solution engineer yang merancang kontrak tool RegulaRAG',
     'Pendekatan evidence-grounded sudah dipilih. Sebelum menulis prompt, lo harus memastikan output dapat diperiksa dan digunakan sistem lain.',
     [
-      beat('structured output', 'Citation yang terlihat rapi tetapi tidak dapat dipercaya', 'Caller membutuhkan document ID, page, passage, dan confidence. Jawaban model yang hanya berupa teks atau JSON bebas dapat kehilangan field penting tanpa terlihat gagal.', 'Struktur output minimum apa yang harus diwajibkan agar missing evidence menjadi error yang jelas?', 'bagian respons yang wajib ada → tipe atau batas nilai tiap bagian → kondisi yang dianggap tidak lengkap → bentuk kegagalan yang diterima caller'),
-      beat('tool schema', 'Tool pencarian membutuhkan pagar', 'Document inventory mempunyai version, status, page, dan authority metadata. Tool retrieval perlu menerima filter yang terbatas dan membedakan success, no evidence, invalid filter, timeout, serta dependency failure.', 'Input, output, permission, dan error apa yang harus menjadi kontrak eksplisit tool ini?', 'permintaan yang diterima → hasil sukses yang dikembalikan → batas akses → ragam kegagalan yang harus dibedakan'),
-      beat('validation', 'Output valid secara bentuk, salah secara bisnis', 'Sebuah citation record dapat lolos sebagai JSON tetapi menunjuk dokumen superseded atau kehilangan page evidence. Sistem berikutnya tidak boleh memperbaiki kekurangan itu diam-diam.', 'Validasi mana yang berasal dari schema dan mana yang harus memeriksa aturan corpus serta provenance?', 'pemeriksaan bentuk data → pemeriksaan status dan asal dokumen → penanganan saat pemeriksaan gagal → pihak atau komponen yang bertanggung jawab'),
+      beat('structured output', 'Citation yang terlihat rapi tetapi tidak dapat dipercaya', 'Caller membutuhkan document ID, page, passage, dan confidence. Jawaban model yang hanya berupa teks atau JSON bebas dapat kehilangan field penting tanpa terlihat gagal.', 'Struktur output minimum apa yang harus diwajibkan agar missing evidence menjadi error yang jelas?', 'bagian respons yang wajib ada → tipe atau batas nilai tiap bagian → kondisi yang dianggap tidak lengkap → bentuk kegagalan yang diterima caller', guide(
+        'Respons mengikuti bentuk tetap yang dapat diperiksa mesin sebelum dipakai komponen lain.',
+        [
+          'Caller sudah membutuhkan document ID, page, passage, dan confidence.',
+          'Modelkan dulu satu citation record, bukan seluruh jawaban akhir.',
+          'Jika satu field wajib hilang, hasil harus terlihat gagal dan tidak diteruskan sebagai sukses.',
+        ],
+        'Untuk satu citation record, field mana yang mengikat passage ke sumber dan apa hasilnya jika field itu hilang?',
+        'field sumber → field lokasi → isi passage → hasil saat field hilang',
+        'Jangan mempercayai JSON yang terlihat rapi tanpa bentuk wajib dan pemeriksaan yang nyata.',
+      )),
+      beat('tool schema', 'Tool pencarian membutuhkan pagar', 'Document inventory mempunyai version, status, page, dan authority metadata. Tool retrieval perlu menerima filter yang terbatas dan membedakan success, no evidence, invalid filter, timeout, serta dependency failure.', 'Input, output, permission, dan error apa yang harus menjadi kontrak eksplisit tool ini?', 'permintaan yang diterima → hasil sukses yang dikembalikan → batas akses → ragam kegagalan yang harus dibedakan', guide(
+        'Kontrak tool menetapkan permintaan yang diterima, hasil yang dikembalikan, izin yang berlaku, dan kegagalan yang harus dibedakan.',
+        [
+          'Filter dapat dibatasi pada metadata inventory seperti version, status, page, dan authority.',
+          'Hasil sukses perlu membawa citation yang dapat ditelusuri.',
+          'Mulai dari satu jalur gagal: no evidence tidak boleh tampak seperti success dengan jawaban kosong.',
+        ],
+        'Saat pencarian tidak menemukan evidence, apa yang perlu diterima caller agar hasil itu tidak disangka sukses?',
+        'status hasil → alasan ringkas → evidence yang tersedia → tindakan caller',
+        'Jangan menerima input bebas atau menyembunyikan beberapa jenis kegagalan dalam satu pesan teks.',
+      )),
+      beat('validation', 'Output valid secara bentuk, salah secara bisnis', 'Sebuah citation record dapat lolos sebagai JSON tetapi menunjuk dokumen superseded atau kehilangan page evidence. Sistem berikutnya tidak boleh memperbaiki kekurangan itu diam-diam.', 'Validasi mana yang berasal dari schema dan mana yang harus memeriksa aturan corpus serta provenance?', 'pemeriksaan bentuk data → pemeriksaan status dan asal dokumen → penanganan saat pemeriksaan gagal → pihak atau komponen yang bertanggung jawab', guide(
+        'Pemeriksaan bentuk data berbeda dari pemeriksaan aturan corpus dan asal evidence; keduanya harus lolos sebelum hasil diteruskan.',
+        [
+          'Citation berbentuk JSON masih dapat menunjuk dokumen superseded.',
+          'Field page yang hilang adalah masalah kelengkapan bentuk dan provenance.',
+          'Status dokumen aktif atau superseded perlu diperiksa terhadap inventory corpus.',
+        ],
+        'Kelompokkan dua kasus ini: page hilang dan dokumen superseded diperiksa di lapisan mana?',
+        'kasus → jenis pemeriksaan → hasil lolos atau gagal → penanganan',
+        'Jangan memperbaiki output yang gagal diam-diam karena jejak error akan hilang.',
+      )),
     ],
   ),
   4: story(
     'junior AI solution engineer yang membatasi control plane RegulaRAG',
     'Tool sudah memiliki kontrak. Kini lo menentukan bagaimana satu run bergerak, berhenti, pulih, atau meminta bantuan manusia.',
     [
-      beat('state machine', 'Run yang tidak tahu kapan selesai', 'Retrieval dapat berhasil, timeout, atau mengembalikan zero evidence; user juga dapat meminta sesuatu di luar corpus. Tanpa state dan terminal path, assistant dapat terus mencoba atau menghasilkan jawaban ambigu.', 'State, event, dan terminal state apa yang diperlukan untuk membedakan success, abstain, escalation, dan failed?', 'tahap yang mungkin dilalui → kejadian yang memindahkan tahap → kondisi berhenti → hasil akhir untuk tiap kondisi'),
-      beat('retry', 'Timeout bukan izin mencoba selamanya', 'Dependency retrieval dapat mengalami gangguan sementara. Retry mungkin membantu, tetapi percobaan tanpa batas dapat memperpanjang latency dan memperburuk outage.', 'Error mana yang layak dicoba ulang, berapa batasnya, dan kapan run harus berhenti atau dieskalasi?', 'jenis gangguan → syarat boleh mencoba lagi → jumlah atau durasi maksimum → kondisi berhenti → jalur setelah batas habis'),
-      beat('approval', 'Batas sebelum tindakan non-read-only', 'RegulaRAG dirancang untuk mencari dan menyusun evidence. Jika sebuah permintaan mengarah pada action di luar read-only, run harus berhenti sebelum side effect terjadi.', 'Apa yang harus terikat pada approval agar keputusan tidak stale dan tidak dapat digunakan untuk case lain?', 'tindakan yang dibatasi → identitas kasus dan versi bukti → pemberi izin serta masa berlaku → pemeriksaan sebelum tindakan dijalankan'),
+      beat('state machine', 'Run yang tidak tahu kapan selesai', 'Retrieval dapat berhasil, timeout, atau mengembalikan zero evidence; user juga dapat meminta sesuatu di luar corpus. Tanpa state dan terminal path, assistant dapat terus mencoba atau menghasilkan jawaban ambigu.', 'State, event, dan terminal state apa yang diperlukan untuk membedakan success, abstain, escalation, dan failed?', 'tahap yang mungkin dilalui → kejadian yang memindahkan tahap → kondisi berhenti → hasil akhir untuk tiap kondisi', guide(
+        'Satu run perlu tahap yang jelas, kejadian yang boleh memindahkannya, dan hasil akhir yang menghentikan proses.',
+        [
+          'Run dimulai dari permintaan lalu masuk ke pencarian evidence.',
+          'Pencarian dapat menghasilkan success, timeout, atau zero evidence.',
+          'Modelkan dulu jalur zero evidence agar run tidak berakhir dengan jawaban ambigu.',
+        ],
+        'Jika pencarian mengembalikan zero evidence, tahap berikut dan hasil akhirnya seharusnya apa?',
+        'tahap sekarang → event → tahap berikut → hasil akhir',
+        'Jangan menyimpan status sebagai label bebas tanpa aturan perpindahan dan kondisi berhenti.',
+      )),
+      beat('retry', 'Timeout bukan izin mencoba selamanya', 'Dependency retrieval dapat mengalami gangguan sementara. Retry mungkin membantu, tetapi percobaan tanpa batas dapat memperpanjang latency dan memperburuk outage.', 'Error mana yang layak dicoba ulang, berapa batasnya, dan kapan run harus berhenti atau dieskalasi?', 'jenis gangguan → syarat boleh mencoba lagi → jumlah atau durasi maksimum → kondisi berhenti → jalur setelah batas habis', guide(
+        'Percobaan ulang hanya untuk gangguan sementara dan selalu memiliki batas waktu, jumlah, serta jalur akhir.',
+        [
+          'Timeout retrieval dapat menandakan gangguan sementara pada dependency.',
+          'Zero evidence adalah hasil pencarian, bukan otomatis gangguan yang pulih jika diulang.',
+          'Setiap percobaan tambahan perlu batas dan kondisi berhenti yang eksplisit.',
+        ],
+        'Dari timeout dan zero evidence, mana yang boleh dicoba lagi dan mana yang harus berhenti?',
+        'jenis error → sementara atau tetap → boleh mencoba lagi → kondisi berhenti',
+        'Jangan mencoba ulang semua error atau membiarkan percobaan berjalan tanpa batas.',
+      )),
+      beat('approval', 'Batas sebelum tindakan non-read-only', 'RegulaRAG dirancang untuk mencari dan menyusun evidence. Jika sebuah permintaan mengarah pada action di luar read-only, run harus berhenti sebelum side effect terjadi.', 'Apa yang harus terikat pada approval agar keputusan tidak stale dan tidak dapat digunakan untuk case lain?', 'tindakan yang dibatasi → identitas kasus dan versi bukti → pemberi izin serta masa berlaku → pemeriksaan sebelum tindakan dijalankan', guide(
+        'Izin manusia harus eksplisit dan terikat pada tindakan serta kondisi kasus yang sedang diperiksa.',
+        [
+          'RegulaRAG pada dasarnya hanya mencari dan menyusun evidence.',
+          'Permintaan non-read-only harus berhenti sebelum side effect terjadi.',
+          'Izin perlu mengacu pada kasus, tindakan, dan versi evidence saat keputusan dibuat.',
+        ],
+        'Sebutkan tiga hal yang harus terikat pada satu izin agar tidak dapat dipakai ulang untuk kasus lain.',
+        'identitas kasus → tindakan yang diminta → versi evidence → masa berlaku',
+        'Jangan memakai izin yang tidak terikat pada kasus, versi, dan pihak yang berwenang.',
+      )),
     ],
   ),
   5: story(
     'junior retrieval engineer yang membangun baseline RegulaRAG',
     'Architecture telah disepakati. Lo mulai dari ingestion dan retrieval sederhana yang dapat diulang sebelum menambahkan optimasi.',
     [
-      beat('ingestion', 'Corpus yang tidak semuanya boleh dipakai', 'Document inventory mencampur dokumen aktif, superseded, table-heavy, dan OCR-required. Semua sumber tetap harus memiliki version, owner, status, serta page lineage.', 'Metadata dan pemeriksaan apa yang menentukan sebuah dokumen boleh masuk retrieval aktif?', 'atribut dokumen yang diperiksa → syarat boleh dipakai → perlakuan untuk dokumen bermasalah → catatan asal dan versi yang dipertahankan'),
-      beat('chunking', 'Potongan yang kehilangan asalnya', 'SOP dan regulasi perlu dipecah agar dapat dicari, tetapi potongan terlalu kecil kehilangan konteks dan potongan terlalu besar menghasilkan retrieval yang noisy. Citation tetap harus kembali ke page atau section asal.', 'Batas pemotongan apa yang lo pilih dan metadata apa yang wajib ikut pada setiap chunk?', 'unit pemotongan yang dipilih → aturan menjaga konteks → metadata asal yang dibawa → cara menilai trade-off ukuran potongan'),
-      beat('vector retrieval', 'Mirip secara makna belum tentu boleh dipakai', 'Pertanyaan compliance dapat menemukan passage yang mirip secara semantic, termasuk dokumen yang salah versi atau tidak sesuai collection. Similarity score tidak membuktikan authority maupun kebenaran.', 'Filter apa yang harus diterapkan sebelum ranking, dan output baseline apa yang perlu dicatat sebelum optimasi?', 'penyaringan sebelum pengurutan → sinyal yang dipakai mengurutkan → hasil yang dicatat per pertanyaan → keterbatasan yang belum terjawab'),
+      beat('ingestion', 'Corpus yang tidak semuanya boleh dipakai', 'Document inventory mencampur dokumen aktif, superseded, table-heavy, dan OCR-required. Semua sumber tetap harus memiliki version, owner, status, serta page lineage.', 'Metadata dan pemeriksaan apa yang menentukan sebuah dokumen boleh masuk retrieval aktif?', 'atribut dokumen yang diperiksa → syarat boleh dipakai → perlakuan untuk dokumen bermasalah → catatan asal dan versi yang dipertahankan', guide(
+        'Sumber perlu diterima, diperiksa, diberi metadata, dan disiapkan secara berulang sebelum boleh dipakai dalam pencarian.',
+        [
+          'Inventory mencampur dokumen aktif, superseded, table-heavy, dan OCR-required.',
+          'Mulai dari satu gerbang: status aktif menentukan apakah dokumen boleh menjadi sumber pencarian aktif.',
+          'Version, owner, status, dan page lineage tetap disimpan meskipun dokumen belum boleh dipakai.',
+        ],
+        'Untuk satu dokumen superseded, apa keputusan pemakaiannya dan metadata apa yang tetap disimpan?',
+        'status dokumen → keputusan pemakaian → alasan → metadata yang dipertahankan',
+        'Jangan memasukkan semua file tanpa provenance, pemeriksaan duplikasi, dan aturan akses.',
+      )),
+      beat('chunking', 'Potongan yang kehilangan asalnya', 'SOP dan regulasi perlu dipecah agar dapat dicari, tetapi potongan terlalu kecil kehilangan konteks dan potongan terlalu besar menghasilkan retrieval yang noisy. Citation tetap harus kembali ke page atau section asal.', 'Batas pemotongan apa yang lo pilih dan metadata apa yang wajib ikut pada setiap chunk?', 'unit pemotongan yang dipilih → aturan menjaga konteks → metadata asal yang dibawa → cara menilai trade-off ukuran potongan', guide(
+        'Dokumen dipecah menjadi unit pencarian yang tetap mempertahankan makna dan hubungan ke sumber aslinya.',
+        [
+          'Potongan terlalu kecil kehilangan konteks, sedangkan potongan terlalu besar membuat hasil noisy.',
+          'Gunakan batas section sebagai kandidat awal karena SOP dan regulasi memiliki struktur.',
+          'Setiap potongan tetap membawa document, version, page, atau section asal.',
+        ],
+        'Untuk satu section SOP yang melintasi dua halaman, unit apa yang dipakai dan asal apa yang disimpan?',
+        'unit potongan → batas konteks → document dan version → page atau section',
+        'Jangan memilih ukuran potongan tanpa menguji kehilangan konteks dan noise pencarian.',
+      )),
+      beat('vector retrieval', 'Mirip secara makna belum tentu boleh dipakai', 'Pertanyaan compliance dapat menemukan passage yang mirip secara semantic, termasuk dokumen yang salah versi atau tidak sesuai collection. Similarity score tidak membuktikan authority maupun kebenaran.', 'Filter apa yang harus diterapkan sebelum ranking, dan output baseline apa yang perlu dicatat sebelum optimasi?', 'penyaringan sebelum pengurutan → sinyal yang dipakai mengurutkan → hasil yang dicatat per pertanyaan → keterbatasan yang belum terjawab', guide(
+        'Pencarian makna mengembalikan kandidat yang mirip, tetapi kemiripan tidak membuktikan authority, izin, atau kebenaran.',
+        [
+          'Passage yang mirip dapat berasal dari versi dokumen atau collection yang salah.',
+          'Batasi kandidat ke dokumen aktif dan collection yang diizinkan sebelum mengurutkan kemiripan.',
+          'Catat kandidat terurut per pertanyaan sebagai hasil awal sebelum optimasi.',
+        ],
+        'Sebelum ranking, dua filter metadata apa yang lo terapkan dan risiko apa yang dicegah?',
+        'filter metadata → nilai yang diizinkan → risiko yang dicegah',
+        'Jangan memperlakukan similarity score sebagai bukti authority atau kebenaran.',
+      )),
     ],
   ),
   6: story(
     'junior evaluation engineer yang membandingkan retrieval RegulaRAG',
     'Baseline berjalan. Tugas lo adalah membuktikan apakah perubahan retrieval benar-benar memperbaiki evidence, bukan sekadar membuat demo terasa lebih bagus.',
     [
-      beat('hybrid search', 'Nomor regulasi yang hilang dalam pencarian semantic', 'Sebagian golden questions memakai istilah konseptual, sedangkan sebagian lain menyebut nomor regulasi atau frasa exact. Vector-only dan lexical search dapat gagal pada jenis query yang berbeda.', 'Bagaimana lo membandingkan vector-only dengan kombinasi lexical dan semantic pada dataset yang sama?', 'varian yang dibandingkan → kondisi eksperimen yang disamakan → ukuran hasil → cara membaca perbedaan → dasar memilih varian'),
-      beat('reranking', 'Dua puluh kandidat, lima tempat untuk evidence', 'Retrieval awal dapat menghasilkan banyak passage kandidat. Reranker mungkin menaikkan passage relevan ke posisi atas, tetapi juga menambah latency dan belum tentu memperbaiki corpus yang buruk.', 'Kapan reranking dianggap memberi nilai, dan metric serta latency apa yang harus dibandingkan?', 'kondisi awal yang perlu diperbaiki → perubahan posisi kandidat yang diukur → tambahan waktu proses → ambang manfaat → keputusan pakai atau tidak'),
-      beat('Recall@k', 'Metric tinggi yang belum menjamin jawaban benar', 'Client peduli source correctness. Passage gold yang muncul dalam top five membantu, tetapi tidak membuktikan citation yang dipakai benar atau generated claim didukung evidence.', 'Apa yang diukur Recall@5, apa yang tidak diukur, dan metric pendamping apa yang dibutuhkan?', 'definisi ukuran → cakupan hasil yang dinilai → hal yang tidak dibuktikan → ukuran pendamping → implikasi untuk keputusan'),
+      beat('hybrid search', 'Nomor regulasi yang hilang dalam pencarian semantic', 'Sebagian golden questions memakai istilah konseptual, sedangkan sebagian lain menyebut nomor regulasi atau frasa exact. Vector-only dan lexical search dapat gagal pada jenis query yang berbeda.', 'Bagaimana lo membandingkan vector-only dengan kombinasi lexical dan semantic pada dataset yang sama?', 'varian yang dibandingkan → kondisi eksperimen yang disamakan → ukuran hasil → cara membaca perbedaan → dasar memilih varian', guide(
+        'Pencarian berbasis kata dan pencarian berbasis makna dapat digabungkan untuk menangani pola pertanyaan yang berbeda.',
+        [
+          'Golden questions memuat istilah konseptual, nomor regulasi, dan frasa exact.',
+          'Tetapkan vector-only dan kombinasi lexical-semantic sebagai dua varian yang dibandingkan.',
+          'Gunakan corpus, pertanyaan, dan sampling yang sama sebelum membaca perbedaannya.',
+        ],
+        'Untuk slice pertanyaan nomor regulasi, ukuran apa yang lo bandingkan pada kedua varian?',
+        'slice pertanyaan → varian A dan B → ukuran hasil → sinyal keputusan',
+        'Jangan menggabungkan skor tanpa normalisasi atau evaluasi pada setiap slice pertanyaan.',
+      )),
+      beat('reranking', 'Dua puluh kandidat, lima tempat untuk evidence', 'Retrieval awal dapat menghasilkan banyak passage kandidat. Reranker mungkin menaikkan passage relevan ke posisi atas, tetapi juga menambah latency dan belum tentu memperbaiki corpus yang buruk.', 'Kapan reranking dianggap memberi nilai, dan metric serta latency apa yang harus dibandingkan?', 'kondisi awal yang perlu diperbaiki → perubahan posisi kandidat yang diukur → tambahan waktu proses → ambang manfaat → keputusan pakai atau tidak', guide(
+        'Kandidat awal dapat diurutkan kembali dengan penilaian yang lebih cermat, tetapi langkah ini menambah waktu proses.',
+        [
+          'Pencarian awal menghasilkan hingga dua puluh passage kandidat untuk lima tempat evidence.',
+          'Bandingkan urutan sebelum dan sesudah pada kumpulan kandidat yang sama.',
+          'Catat perubahan kualitas posisi evidence bersama tambahan waktu proses.',
+        ],
+        'Dua perubahan apa yang perlu terlihat agar pengurutan ulang dianggap bernilai?',
+        'posisi sebelum → posisi sesudah → perubahan kualitas → tambahan waktu → keputusan',
+        'Jangan menganggap pengurutan ulang dapat memperbaiki corpus yang buruk.',
+      )),
+      beat('Recall@k', 'Metric tinggi yang belum menjamin jawaban benar', 'Client peduli source correctness. Passage gold yang muncul dalam top five membantu, tetapi tidak membuktikan citation yang dipakai benar atau generated claim didukung evidence.', 'Apa yang diukur Recall@5, apa yang tidak diukur, dan metric pendamping apa yang dibutuhkan?', 'definisi ukuran → cakupan hasil yang dinilai → hal yang tidak dibuktikan → ukuran pendamping → implikasi untuk keputusan', guide(
+        'Ukuran ini menunjukkan apakah evidence relevan muncul di antara sejumlah hasil teratas, bukan apakah jawaban akhir sudah benar.',
+        [
+          'Passage gold pada posisi empat berarti evidence relevan ditemukan dalam lima kandidat awal.',
+          'Hasil itu belum membuktikan citation yang dipakai mendukung generated claim.',
+          'Karena client peduli source correctness, tambahkan pemeriksaan ketepatan citation.',
+        ],
+        'Jika passage gold ada di posisi empat tetapi jawaban memakai citation salah, bagaimana dua ukurannya dibaca?',
+        'posisi gold → hit atau miss → citation benar atau salah → kesimpulan',
+        'Jangan menyebut nilai retrieval tinggi sebagai bukti bahwa jawaban akhir selalu benar.',
+      )),
     ],
   ),
   7: story(
     'junior AI security engineer yang menguji knowledge boundary RegulaRAG',
     'Retrieval membaik. Sekarang lo memperlakukan pertanyaan dan dokumen sebagai input yang dapat salah atau sengaja berbahaya.',
     [
-      beat('abstention', 'Pertanyaan yang tidak punya dasar jawaban', 'Beberapa golden questions tidak memiliki evidence di corpus dan dua versi SOP dapat berkonflik. Jawaban yang terdengar yakin tetapi tidak bersumber menimbulkan risiko compliance.', 'Signal apa yang membuat sistem harus menolak menjawab, dan jalur aman apa yang diberikan kepada user?', 'sinyal kekurangan atau konflik bukti → keputusan respons → pesan aman untuk pengguna → jalur tindak lanjut'),
-      beat('prompt injection', 'Instruksi tersembunyi di dalam SOP', 'Satu SOP sintetis berisi instruksi agar model mengabaikan system policy. Teks itu masuk melalui retrieval sebagai data, bukan sebagai instruksi yang berwenang.', 'Bagaimana arsitektur memisahkan trusted instruction dari untrusted document text dan membuktikannya lewat test?', 'asal instruksi dan data → aturan prioritas antar-sumber → kontrol saat dokumen memuat perintah → skenario uji dan hasil yang diharapkan'),
-      beat('data boundary', 'Permintaan di luar collection yang diizinkan', 'User mencoba meminta dokumen di luar allowed collection. Prompt, secret, dan sensitive payload juga tidak boleh muncul pada citation atau trace.', 'Data apa yang boleh masuk, dilihat, disimpan, dan keluar pada setiap boundary sistem?', 'jenis data → titik masuk dan pihak yang boleh melihat → aturan penyimpanan → keluaran yang diizinkan → perlakuan untuk data terlarang'),
+      beat('abstention', 'Pertanyaan yang tidak punya dasar jawaban', 'Beberapa golden questions tidak memiliki evidence di corpus dan dua versi SOP dapat berkonflik. Jawaban yang terdengar yakin tetapi tidak bersumber menimbulkan risiko compliance.', 'Signal apa yang membuat sistem harus menolak menjawab, dan jalur aman apa yang diberikan kepada user?', 'sinyal kekurangan atau konflik bukti → keputusan respons → pesan aman untuk pengguna → jalur tindak lanjut', guide(
+        'Sistem perlu memilih tidak menjawab ketika evidence, keyakinan, atau izin tidak cukup, lalu memberi jalur aman berikutnya.',
+        [
+          'Tidak ada evidence dan konflik dua versi SOP adalah dua pemicu yang sudah terlihat.',
+          'Respons aman tidak boleh membuat sumber atau menyamarkan konflik.',
+          'User tetap membutuhkan pesan yang jelas dan jalur ke pemeriksa manusia.',
+        ],
+        'Jika dua versi SOP berkonflik, apa keputusan respons dan ke mana user diarahkan?',
+        'signal konflik → keputusan respons → pesan untuk user → jalur tindak lanjut',
+        'Jangan menganggap penolakan menjawab sebagai kegagalan tanpa mengukur apakah eskalasinya aman.',
+      )),
+      beat('prompt injection', 'Instruksi tersembunyi di dalam SOP', 'Satu SOP sintetis berisi instruksi agar model mengabaikan system policy. Teks itu masuk melalui retrieval sebagai data, bukan sebagai instruksi yang berwenang.', 'Bagaimana arsitektur memisahkan trusted instruction dari untrusted document text dan membuktikannya lewat test?', 'asal instruksi dan data → aturan prioritas antar-sumber → kontrol saat dokumen memuat perintah → skenario uji dan hasil yang diharapkan', guide(
+        'Perintah berbahaya dapat disisipkan dalam pertanyaan atau dokumen untuk mencoba mengubah perilaku model.',
+        [
+          'SOP sintetis memuat teks yang meminta model mengabaikan system policy.',
+          'Teks hasil retrieval diperlakukan sebagai data tidak tepercaya, bukan instruksi berwenang.',
+          'Satu test perlu membuktikan bahwa system policy tetap berlaku saat teks itu ditemukan.',
+        ],
+        'Dalam satu test, input berbahaya, perilaku yang harus diblokir, dan bukti lulusnya apa?',
+        'teks berbahaya → aturan tepercaya → perilaku yang diblokir → bukti test',
+        'Jangan pernah memperlakukan teks hasil retrieval sebagai instruksi tepercaya.',
+      )),
+      beat('data boundary', 'Permintaan di luar collection yang diizinkan', 'User mencoba meminta dokumen di luar allowed collection. Prompt, secret, dan sensitive payload juga tidak boleh muncul pada citation atau trace.', 'Data apa yang boleh masuk, dilihat, disimpan, dan keluar pada setiap boundary sistem?', 'jenis data → titik masuk dan pihak yang boleh melihat → aturan penyimpanan → keluaran yang diizinkan → perlakuan untuk data terlarang', guide(
+        'Setiap batas sistem perlu menyatakan data yang boleh masuk, dilihat, disimpan, dan dikeluarkan.',
+        [
+          'Demo hanya mengizinkan regulasi publik dan SOP sintetis dalam collection yang disetujui.',
+          'Permintaan dokumen di luar collection harus ditolak sebelum isi dokumen terlihat.',
+          'Prompt, secret, dan sensitive payload tidak boleh muncul dalam citation atau trace.',
+        ],
+        'Untuk permintaan di luar allowed collection, apa keputusan akses dan hasil apa yang aman terlihat?',
+        'jenis data → status collection → keputusan akses → hasil pada citation atau trace',
+        'Jangan menulis “aman” tanpa menyebut kelas data dan lokasi kontrolnya.',
+      )),
     ],
   ),
   8: story(
     'junior AI solution engineer yang menyiapkan delivery packet RegulaRAG',
     'Sistem harus dapat dipahami stakeholder dalam lima menit dan tetap menunjukkan evidence ketika normal flow gagal.',
     [
-      beat('tracing', 'Demo gagal tanpa petunjuk di langkah mana', 'Normal flow dapat terlihat baik, tetapi retrieval kosong, reranker, abstention, atau dependency error tidak dapat dijelaskan jika hanya output akhir yang dicatat.', 'Event dan span apa yang harus tersambung agar satu run dapat direkonstruksi dari ingest sampai answer atau abstain?', 'tahap run yang dicatat → identitas penghubung antar-event → input atau hasil ringkas tiap tahap → kondisi akhir → cara menelusuri kegagalan'),
-      beat('latency', 'Rata-rata cepat, sebagian user tetap menunggu lama', 'README belum menunjukkan p50 dan p95. Waktu total berasal dari retrieval, reranking, model, queue, dan kemungkinan human wait yang memiliki owner berbeda.', 'Boundary latency apa yang relevan, percentile apa yang dilaporkan, dan bagaimana lo menemukan komponen paling lambat?', 'titik awal dan akhir pengukuran → kelompok waktu yang dilaporkan → kontribusi tiap komponen → cara menemukan penyebab ekor lambat'),
-      beat('cost per query', 'Harga model bukan seluruh biaya', 'Satu query dapat memakai retrieval, reranking, model, storage, retry, dan human escalation. Cost claim tanpa workload dan trace akan sulit dipercaya client.', 'Komponen biaya apa yang dihitung per query dan asumsi apa yang harus terlihat pada laporan?', 'komponen pengeluaran → satuan pemakaian tiap komponen → rumus per permintaan → asumsi beban kerja → keterbatasan perhitungan'),
+      beat('tracing', 'Demo gagal tanpa petunjuk di langkah mana', 'Normal flow dapat terlihat baik, tetapi retrieval kosong, reranker, abstention, atau dependency error tidak dapat dijelaskan jika hanya output akhir yang dicatat.', 'Event dan span apa yang harus tersambung agar satu run dapat direkonstruksi dari ingest sampai answer atau abstain?', 'tahap run yang dicatat → identitas penghubung antar-event → input atau hasil ringkas tiap tahap → kondisi akhir → cara menelusuri kegagalan', guide(
+        'Satu run perlu rekaman terstruktur yang menghubungkan langkah, pemanggilan tool, waktu, error, dan keputusan.',
+        [
+          'Run dapat melewati retrieval kosong lalu berakhir tanpa jawaban berbasis evidence.',
+          'Gunakan satu trace ID untuk menghubungkan event pencarian, keputusan, dan hasil akhir.',
+          'Output akhir saja tidak cukup untuk menunjukkan langkah pertama yang gagal.',
+        ],
+        'Untuk jalur retrieval kosong, tiga event apa yang dicatat dengan identifier yang sama?',
+        'run ID → event retrieval → event keputusan → event akhir',
+        'Jangan hanya mencatat output final karena jalur kegagalan tidak akan dapat direkonstruksi.',
+      )),
+      beat('latency', 'Rata-rata cepat, sebagian user tetap menunggu lama', 'README belum menunjukkan p50 dan p95. Waktu total berasal dari retrieval, reranking, model, queue, dan kemungkinan human wait yang memiliki owner berbeda.', 'Boundary latency apa yang relevan, percentile apa yang dilaporkan, dan bagaimana lo menemukan komponen paling lambat?', 'titik awal dan akhir pengukuran → kelompok waktu yang dilaporkan → kontribusi tiap komponen → cara menemukan penyebab ekor lambat', guide(
+        'Waktu perlu diukur dari event awal ke hasil pada batas yang disepakati, lalu dibaca sebagai distribusi dan kontribusi komponen.',
+        [
+          'README belum menunjukkan p50 dan p95.',
+          'Waktu total mencakup retrieval, reranking, model, queue, dan kemungkinan human wait.',
+          'Pisahkan kontribusi tiap komponen agar owner hambatan dapat ditemukan.',
+        ],
+        'Untuk respons RegulaRAG ke user, event awal, event akhir, dan dua percentile apa yang lo pilih?',
+        'event mulai → event selesai → p50 dan p95 → komponen terlambat',
+        'Jangan mengoptimalkan rata-rata sambil menyembunyikan ekor waktu yang lambat.',
+      )),
+      beat('cost per query', 'Harga model bukan seluruh biaya', 'Satu query dapat memakai retrieval, reranking, model, storage, retry, dan human escalation. Cost claim tanpa workload dan trace akan sulit dipercaya client.', 'Komponen biaya apa yang dihitung per query dan asumsi apa yang harus terlihat pada laporan?', 'komponen pengeluaran → satuan pemakaian tiap komponen → rumus per permintaan → asumsi beban kerja → keterbatasan perhitungan', guide(
+        'Biaya satu permintaan mencakup semua pemakaian incremental dari awal sampai hasil, bukan harga model saja.',
+        [
+          'Satu query dapat memakai retrieval, reranking, model, storage, retry, dan human escalation.',
+          'Tetapkan satu query sebagai batas perhitungan agar komponen dapat dijumlahkan konsisten.',
+          'Ambil satuan pemakaian dari trace lalu pisahkan asumsi workload dan kerja manusia.',
+        ],
+        'Untuk satu query, pilih tiga komponen biaya dan satuan pemakaian masing-masing.',
+        'komponen → satuan pemakaian → asumsi tarif → subtotal per query',
+        'Jangan menghitung harga model saja lalu melupakan retry dan human escalation.',
+      )),
     ],
   ),
   9: story(
     'junior operations solution architect yang memetakan InvoiceOps',
     'Lo pindah ke case finance. Sebelum membuat agent, lo harus memahami jalur invoice normal dan exception yang saat ini bercampur.',
     [
-      beat('process mining', 'Invoice yang berpindah tanpa jejak terpadu', 'Tim AP menerima invoice melalui email dan spreadsheet lalu mencocokkannya dengan PO serta goods receipt di mock ERP. Normal case dan exception bercampur, sementara audit trail belum terpadu.', 'Event minimum apa yang perlu dicatat agar satu invoice dapat direkonstruksi dari intake sampai terminal state?', 'event penanda → aktor dan waktu tiap event → data yang berubah → hubungan antar-event → kondisi akhir'),
-      beat('exception taxonomy', 'Empat masalah, empat jalur penanganan', 'Duplicate upload, missing PO, quantity mismatch, dan scan buruk mempunyai signal, owner, recovery, serta risiko berbeda. Kategori yang terlalu umum akan membuat routing dan SLA tidak actionable.', 'Bagaimana lo membedakan kategori exception dan menentukan owner, allowed action, serta terminal state-nya?', 'dasar membedakan kasus → signal pemicu → owner penanganan → tindakan yang dibolehkan → kondisi akhir'),
-      beat('permission map', 'Yang memproses bukan yang boleh membayar', 'Staf AP menjalankan workflow dan Finance Controller memegang payment approval. Agent boleh membaca evidence atau mengusulkan route, tetapi tidak boleh menghitung pajak atau melakukan pembayaran.', 'Capability mana yang boleh read, propose, approve, write, atau harus selalu deny untuk setiap role?', 'role atau sistem → kebutuhan tugas → capability yang diminta → wewenang yang diberikan → batas yang ditolak'),
+      beat('process mining', 'Invoice yang berpindah tanpa jejak terpadu', 'Tim AP menerima invoice melalui email dan spreadsheet lalu mencocokkannya dengan PO serta goods receipt di mock ERP. Normal case dan exception bercampur, sementara audit trail belum terpadu.', 'Event minimum apa yang perlu dicatat agar satu invoice dapat direkonstruksi dari intake sampai terminal state?', 'event penanda → aktor dan waktu tiap event → data yang berubah → hubungan antar-event → kondisi akhir', guide('Ini cara membaca alur nyata dari jejak event untuk menemukan variasi dan titik macet, bukan menggambar proses ideal.', ['Mulai dari satu invoice yang diterima tim AP melalui email.', 'Catat satu perpindahan awal: invoice diterima → pencocokan PO dimulai.', 'Biarkan event setelah pencocokan terbuka sampai lo menentukan penanda berikutnya.'], 'Dua timestamp apa yang paling dulu lo butuhkan untuk mengukur waktu dari intake ke awal pencocokan?', 'timestamp invoice diterima → timestamp pencocokan dimulai → selisih waktunya', 'Jangan menggambar alur ideal tanpa mengecek event yang benar-benar terjadi.')),
+      beat('exception taxonomy', 'Empat masalah, empat jalur penanganan', 'Duplicate upload, missing PO, quantity mismatch, dan scan buruk mempunyai signal, owner, recovery, serta risiko berbeda. Kategori yang terlalu umum akan membuat routing dan SLA tidak actionable.', 'Bagaimana lo membedakan kategori exception dan menentukan owner, allowed action, serta terminal state-nya?', 'dasar membedakan kasus → signal pemicu → owner penanganan → tindakan yang dibolehkan → kondisi akhir', guide('Ini cara memisahkan masalah ke kategori yang punya signal, owner, tindakan aman, dan akhir penanganan yang berbeda.', ['Ambil satu kasus quantity mismatch dari daftar exception InvoiceOps.', 'Tandai signal awalnya sebagai selisih jumlah antara invoice dan goods receipt.', 'Owner dan kondisi akhirnya sengaja belum diisi untuk lo putuskan.'], 'Siapa yang perlu menerima kasus quantity mismatch untuk pemeriksaan pertama, dan kapan kasus itu dianggap selesai?', 'kasus yang dipilih → owner pertama → tanda kasus selesai', 'Jangan membuat satu kategori umum yang mencampur masalah dengan owner atau recovery berbeda.')),
+      beat('permission map', 'Yang memproses bukan yang boleh membayar', 'Staf AP menjalankan workflow dan Finance Controller memegang payment approval. Agent boleh membaca evidence atau mengusulkan route, tetapi tidak boleh menghitung pajak atau melakukan pembayaran.', 'Capability mana yang boleh read, propose, approve, write, atau harus selalu deny untuk setiap role?', 'role atau sistem → kebutuhan tugas → capability yang diminta → wewenang yang diberikan → batas yang ditolak', guide('Ini cara menuliskan wewenang setiap role terhadap satu capability agar batas read, propose, approve, write, dan deny dapat diperiksa.', ['Pilih capability melakukan pembayaran pada InvoiceOps.', 'Evidence menetapkan Finance Controller memegang approval, sedangkan agent tidak boleh melakukan pembayaran.', 'Hak staf AP untuk capability ini sengaja belum ditetapkan.'], 'Untuk capability pembayaran, wewenang apa yang harus dicatat untuk Finance Controller dan agent?', 'role → capability → status wewenang', 'Jangan mengandalkan nama role tanpa pemeriksaan wewenang di boundary sistem.')),
     ],
   ),
   10: story(
     'junior agentic automation engineer yang menghubungkan InvoiceOps ke tools',
     'Process map stabil. Lo membangun integration layer sambil menjaga calculation rules tetap deterministic dan dapat diuji.',
     [
-      beat('typed tools', 'Tool mengembalikan data yang tidak dapat dibedakan dari error', 'InvoiceOps perlu membaca PO, receipt, dan vendor dari mock ERP. Caller harus dapat membedakan success, not found, invalid input, timeout, dan dependency failure tanpa menebak dari teks.', 'Kontrak input, output, permission, timeout, dan error apa yang diperlukan untuk setiap tool?', 'tujuan operasi → input wajib → output saat berhasil → bentuk error → aturan akses dan timeout'),
-      beat('mock ERP', 'Dependency aman untuk dibuat gagal', 'Lo tidak boleh menyentuh ERP nyata, tetapi tetap perlu menguji missing PO, quantity mismatch, timeout, dan outage. Simulator yang selalu happy path akan memberi confidence palsu.', 'Behavior normal dan failure apa yang harus disediakan mock ERP agar contract dan recovery dapat diuji?', 'skenario normal → kondisi gagal yang disimulasikan → respons dependency → state yang diharapkan → bukti test'),
-      beat('n8n webhook', 'Event yang datang dua kali', 'Invoice dapat dikirim ulang melalui email atau webhook. n8n hanya menjadi inbound integration layer dan tidak boleh menyimpan hidden business logic.', 'Apa yang harus divalidasi, dicatat, dan di-dedupe sebelum webhook mengakui event sebagai diterima?', 'identitas event → validasi sebelum diterima → catatan yang disimpan → cara mengenali kiriman ulang → hasil penerimaan'),
+      beat('typed tools', 'Tool mengembalikan data yang tidak dapat dibedakan dari error', 'InvoiceOps perlu membaca PO, receipt, dan vendor dari mock ERP. Caller harus dapat membedakan success, not found, invalid input, timeout, dan dependency failure tanpa menebak dari teks.', 'Kontrak input, output, permission, timeout, dan error apa yang diperlukan untuk setiap tool?', 'tujuan operasi → input wajib → output saat berhasil → bentuk error → aturan akses dan timeout', guide('Ini kontrak yang membuat caller dapat memeriksa bentuk input, hasil sukses, permission, timeout, dan setiap jenis error tanpa menebak dari teks.', ['Ambil satu operasi membaca PO dari mock ERP.', 'Tetapkan input awalnya sebagai identitas PO dan hasil suksesnya sebagai data PO yang ditemukan.', 'Permission, timeout, dan bentuk error sengaja belum diisi.'], 'Jika PO tidak ditemukan, hasil kecil apa yang harus berbeda dari timeout?', 'kondisi → jenis hasil → informasi minimum', 'Jangan menyatukan not found dan dependency timeout dalam pesan bebas yang sama.')),
+      beat('mock ERP', 'Dependency aman untuk dibuat gagal', 'Lo tidak boleh menyentuh ERP nyata, tetapi tetap perlu menguji missing PO, quantity mismatch, timeout, dan outage. Simulator yang selalu happy path akan memberi confidence palsu.', 'Behavior normal dan failure apa yang harus disediakan mock ERP agar contract dan recovery dapat diuji?', 'skenario normal → kondisi gagal yang disimulasikan → respons dependency → state yang diharapkan → bukti test', guide('Ini simulator dependency yang meniru respons normal dan gagal supaya integrasi InvoiceOps dapat diuji tanpa menyentuh ERP nyata.', ['Gunakan satu skenario missing PO dari InvoiceOps.', 'Atur simulator menerima identitas PO lalu mengembalikan hasil tidak ditemukan.', 'Jalur pemulihan caller sengaja belum ditentukan.'], 'Setelah hasil tidak ditemukan, state case apa yang seharusnya terlihat oleh test?', 'hasil simulator → state case → bukti test', 'Jangan membuat simulator yang hanya selalu mengembalikan happy path.')),
+      beat('n8n webhook', 'Event yang datang dua kali', 'Invoice dapat dikirim ulang melalui email atau webhook. n8n hanya menjadi inbound integration layer dan tidak boleh menyimpan hidden business logic.', 'Apa yang harus divalidasi, dicatat, dan di-dedupe sebelum webhook mengakui event sebagai diterima?', 'identitas event → validasi sebelum diterima → catatan yang disimpan → cara mengenali kiriman ulang → hasil penerimaan', guide('Ini batas penerima event HTTP yang memeriksa payload, mengenali kiriman ulang, mencatat penerimaan, lalu memberi acknowledgement.', ['Pakai satu invoice yang dikirim ulang melalui webhook.', 'Baca identitas event sebelum service API dipanggil.', 'Aturan menerima atau menolak kiriman kedua sengaja belum diputuskan.'], 'Pemeriksaan pertama apa yang menentukan event ini baru atau kiriman ulang?', 'identitas event → catatan penerimaan sebelumnya → keputusan awal', 'Jangan meneruskan payload sebelum schema dan duplikasinya diperiksa.')),
     ],
   ),
   11: story(
     'junior agentic automation engineer yang membuat approval workflow dapat dilanjutkan',
     'Tools bekerja. Sekarang satu case harus mampu pause berjam-jam, ditinjau, lalu resume tanpa kehilangan evidence atau memakai approval lama.',
     [
-      beat('checkpoint', 'Case berhenti saat menunggu reviewer', 'Low-confidence extraction harus masuk reviewer queue. Selama menunggu, service dapat restart dan case dapat berubah, sehingga chat history saja tidak cukup sebagai state.', 'State, evidence snapshot, dan version apa yang harus disimpan agar case dapat dilanjutkan dengan aman?', 'state case saat pause → evidence yang dibekukan → version yang ditautkan → syarat resume → penanganan jika data berubah'),
-      beat('human-in-the-loop', 'Reviewer membutuhkan lebih dari tombol approve', 'Reviewer harus melihat extracted fields, source region, deterministic calculations, confidence, dan alasan escalation. Tanpa context itu, approval hanya memindahkan risiko ke manusia.', 'Informasi dan tindakan minimum apa yang harus tersedia agar reviewer dapat memeriksa, mengoreksi, atau menolak case?', 'context yang dilihat reviewer → keputusan yang tersedia → koreksi yang boleh dibuat → alasan keputusan → hasil setelah review'),
-      beat('audit trail', 'Pertanyaan setelah write terjadi', 'Tim perlu menjawab siapa mengubah route, evidence version mana yang dilihat, approval token apa yang dipakai, dan apakah write terjadi sekali. Log sensitif juga tidak boleh membocorkan secret.', 'Event apa yang harus immutable agar urutan actor, decision, state change, dan side effect dapat direkonstruksi?', 'event yang direkam → actor dan timestamp → evidence serta version yang dipakai → perubahan state → hasil side effect'),
+      beat('checkpoint', 'Case berhenti saat menunggu reviewer', 'Low-confidence extraction harus masuk reviewer queue. Selama menunggu, service dapat restart dan case dapat berubah, sehingga chat history saja tidak cukup sebagai state.', 'State, evidence snapshot, dan version apa yang harus disimpan agar case dapat dilanjutkan dengan aman?', 'state case saat pause → evidence yang dibekukan → version yang ditautkan → syarat resume → penanganan jika data berubah', guide('Ini snapshot state dan evidence yang membuat case bisa pause lalu resume dengan versi yang masih dapat dipercaya.', ['Ambil case low-confidence yang masuk reviewer queue.', 'Simpan state menunggu review dan snapshot extracted fields yang sedang diperiksa.', 'Versi case serta syarat resume sengaja belum diisi.'], 'Versi apa yang harus dibandingkan sebelum case dilanjutkan setelah reviewer selesai?', 'versi saat pause → versi saat resume → keputusan lanjut atau tahan', 'Jangan mengandalkan chat history yang tidak versioned sebagai state untuk resume.')),
+      beat('human-in-the-loop', 'Reviewer membutuhkan lebih dari tombol approve', 'Reviewer harus melihat extracted fields, source region, deterministic calculations, confidence, dan alasan escalation. Tanpa context itu, approval hanya memindahkan risiko ke manusia.', 'Informasi dan tindakan minimum apa yang harus tersedia agar reviewer dapat memeriksa, mengoreksi, atau menolak case?', 'context yang dilihat reviewer → keputusan yang tersedia → koreksi yang boleh dibuat → alasan keputusan → hasil setelah review', guide('Ini titik ketika reviewer mendapat context cukup untuk memeriksa, mengoreksi, menolak, atau menyetujui langkah berikutnya.', ['Gunakan satu case low-confidence dari reviewer queue.', 'Tampilkan extracted fields dan source region yang mendasarinya.', 'Pilihan tindakan reviewer dan hasil setelah koreksi sengaja belum diisi.'], 'Dua tindakan apa selain approve yang harus tersedia bagi reviewer?', 'tindakan reviewer → alasan memilih → perubahan pada case', 'Jangan menjadikan reviewer tombol approve tanpa evidence dan context.')),
+      beat('audit trail', 'Pertanyaan setelah write terjadi', 'Tim perlu menjawab siapa mengubah route, evidence version mana yang dilihat, approval token apa yang dipakai, dan apakah write terjadi sekali. Log sensitif juga tidak boleh membocorkan secret.', 'Event apa yang harus immutable agar urutan actor, decision, state change, dan side effect dapat direkonstruksi?', 'event yang direkam → actor dan timestamp → evidence serta version yang dipakai → perubahan state → hasil side effect', guide('Ini urutan event yang membuat actor, waktu, evidence version, keputusan, perubahan state, dan side effect dapat ditelusuri kembali.', ['Mulai dari satu route InvoiceOps yang diubah setelah review.', 'Catat actor, timestamp, dan state sebelum perubahan.', 'Approval token serta hasil write sengaja belum dicatat.'], 'Field apa yang menghubungkan keputusan reviewer dengan write yang terjadi sesudahnya?', 'keputusan reviewer → penghubung yang dicatat → write terkait', 'Jangan membuat log yang dapat diubah atau membocorkan secret.')),
     ],
   ),
   12: story(
     'junior reliability engineer yang menguji failure InvoiceOps',
     'Happy path selesai. Lo sengaja membuat duplicate input, timeout, malformed output, dan outage untuk memastikan tidak ada aksi ganda atau case hilang.',
     [
-      beat('idempotency', 'Webhook yang diputar ulang', 'Delivery menggunakan at-least-once semantics sehingga event yang sama dapat datang lebih dari sekali. Dependency juga dapat berhasil setelah caller menganggap request timeout.', 'Key dan state check apa yang memastikan replay menghasilkan satu case dan satu side effect?', 'identitas request → pemeriksaan state → keputusan sebelum action → hasil saat request diulang'),
-      beat('backoff', 'Semua worker mencoba lagi bersamaan', 'ERP outage atau rate limit dapat bersifat sementara. Retry serentak tanpa batas akan memperparah dependency failure dan meningkatkan latency.', 'Bagaimana menentukan timeout, retry count, delay yang meningkat, jitter, dan kondisi berhenti?', 'jenis kegagalan → timeout tiap percobaan → pola jeda dan variasinya → batas percobaan → kondisi berhenti'),
-      beat('dead-letter queue', 'Message yang tidak pernah berhasil', 'Malformed payload atau dependency failure dapat tetap gagal setelah retry budget habis. Message tidak boleh hilang atau diputar tanpa akhir.', 'Informasi apa yang masuk dead-letter path, siapa owner-nya, dan syarat apa yang membuat replay aman?', 'message yang dialihkan → alasan dan riwayat kegagalan → data untuk investigasi → owner penanganan → syarat replay'),
+      beat('idempotency', 'Webhook yang diputar ulang', 'Delivery menggunakan at-least-once semantics sehingga event yang sama dapat datang lebih dari sekali. Dependency juga dapat berhasil setelah caller menganggap request timeout.', 'Key dan state check apa yang memastikan replay menghasilkan satu case dan satu side effect?', 'identitas request → pemeriksaan state → keputusan sebelum action → hasil saat request diulang', guide('Ini sifat yang memastikan request sama dapat diproses ulang tanpa membuat case atau side effect kedua.', ['Gunakan satu event invoice yang tiba lagi setelah caller mengalami timeout.', 'Bandingkan identitas request dengan operasi yang sudah tercatat sebelum action baru.', 'Hasil ketika state sebelumnya belum pasti sengaja belum diputuskan.'], 'Jika identitas request sudah tercatat selesai, action apa yang harus terjadi pada replay?', 'status request sebelumnya → keputusan action → hasil replay', 'Jangan menganggap retry aman hanya karena endpoint pernah mengembalikan success.')),
+      beat('backoff', 'Semua worker mencoba lagi bersamaan', 'ERP outage atau rate limit dapat bersifat sementara. Retry serentak tanpa batas akan memperparah dependency failure dan meningkatkan latency.', 'Bagaimana menentukan timeout, retry count, delay yang meningkat, jitter, dan kondisi berhenti?', 'jenis kegagalan → timeout tiap percobaan → pola jeda dan variasinya → batas percobaan → kondisi berhenti', guide('Ini jeda retry yang meningkat dan diberi variasi agar dependency sempat pulih tanpa semua worker mencoba bersamaan.', ['Ambil kegagalan ERP sementara pada satu case InvoiceOps.', 'Tetapkan bahwa hanya error sementara yang boleh masuk percobaan berikutnya.', 'Jumlah retry, pola jeda, dan kondisi berhenti sengaja belum diisi.'], 'Setelah satu kegagalan sementara, apakah percobaan berikutnya dilakukan langsung atau setelah jeda?', 'jenis error → waktu percobaan berikutnya → alasannya', 'Jangan membuat semua worker retry serentak atau tanpa batas.')),
+      beat('dead-letter queue', 'Message yang tidak pernah berhasil', 'Malformed payload atau dependency failure dapat tetap gagal setelah retry budget habis. Message tidak boleh hilang atau diputar tanpa akhir.', 'Informasi apa yang masuk dead-letter path, siapa owner-nya, dan syarat apa yang membuat replay aman?', 'message yang dialihkan → alasan dan riwayat kegagalan → data untuk investigasi → owner penanganan → syarat replay', guide('Ini jalur terminal untuk message yang tetap gagal setelah retry habis agar tidak hilang dan bisa diperiksa sebelum replay.', ['Gunakan satu payload invoice malformed yang terus gagal divalidasi.', 'Simpan payload reference dan riwayat kegagalannya di jalur terpisah.', 'Owner serta syarat replay sengaja belum diisi.'], 'Siapa yang harus menerima alert pertama untuk message ini, dan bukti apa yang perlu dilihat?', 'message gagal → owner alert → bukti kegagalan', 'Jangan membiarkan jalur gagal menjadi tempat tanpa owner, alert, atau aturan replay.')),
     ],
   ),
   13: story(
     'junior evaluation engineer yang mengukur outcome InvoiceOps',
     'Workflow sudah reliable. Lo harus membuktikan apakah automation mengurangi kerja manual tanpa menyembunyikan low-confidence atau risiko finansial.',
     [
-      beat('routing accuracy', 'Accuracy tinggi yang menyembunyikan exception berisiko', 'Dataset sintetis memuat normal, mismatch, duplicate, low-confidence, dan malicious cases. Satu aggregate accuracy dapat menutupi kegagalan pada category berisiko tinggi.', 'Bagaimana gold label, metric per category, dan error analysis disusun agar routing claim dapat dipercaya?', 'cara menetapkan gold label → pembagian jenis case → metric per jenis → pola salah route → dasar menerima klaim'),
-      beat('human-touch time', 'Kerja manual hilang atau hanya berpindah', 'Assisted workflow dapat mengurangi pencarian, tetapi low-confidence case tetap masuk reviewer queue. Handoff dan waktu tunggu tidak boleh dihapus dari pengukuran.', 'Touch manusia apa yang dihitung dari intake sampai terminal state dan bagaimana dibandingkan dengan manual baseline?', 'langkah yang masih dikerjakan manusia → waktu aktif dan waktu tunggu → titik handoff → manual baseline → cara membandingkan perubahan'),
-      beat('cost per case', 'ROI sintetis yang terlihat terlalu pasti', 'Cost mencakup model, tools, storage, retries, dan loaded human review time. Manual baseline dan volume memakai data sintetis sehingga tidak boleh diklaim sebagai savings client nyata.', 'Formula, asumsi, sensitivity, dan limitation apa yang wajib terlihat pada simulated ROI?', 'komponen biaya → baseline dan volume → formula simulasi → perubahan asumsi → batas klaim hasil'),
+      beat('routing accuracy', 'Accuracy tinggi yang menyembunyikan exception berisiko', 'Dataset sintetis memuat normal, mismatch, duplicate, low-confidence, dan malicious cases. Satu aggregate accuracy dapat menutupi kegagalan pada category berisiko tinggi.', 'Bagaimana gold label, metric per category, dan error analysis disusun agar routing claim dapat dipercaya?', 'cara menetapkan gold label → pembagian jenis case → metric per jenis → pola salah route → dasar menerima klaim', guide('Ini ukuran ketepatan route sistem terhadap label acuan, dibaca per jenis case agar kegagalan berisiko tidak tertutup rata-rata.', ['Pilih slice quantity mismatch dari dataset sintetis InvoiceOps.', 'Bandingkan route hasil sistem dengan label acuan untuk slice itu.', 'Jenis salah route dan ringkasan metric sengaja belum dihitung.'], 'Untuk satu case quantity mismatch, dua label apa yang perlu dibandingkan?', 'label acuan → route sistem → cocok atau tidak', 'Jangan memakai satu accuracy aggregate yang menyembunyikan kegagalan kategori berisiko.')),
+      beat('human-touch time', 'Kerja manual hilang atau hanya berpindah', 'Assisted workflow dapat mengurangi pencarian, tetapi low-confidence case tetap masuk reviewer queue. Handoff dan waktu tunggu tidak boleh dihapus dari pengukuran.', 'Touch manusia apa yang dihitung dari intake sampai terminal state dan bagaimana dibandingkan dengan manual baseline?', 'langkah yang masih dikerjakan manusia → waktu aktif dan waktu tunggu → titik handoff → manual baseline → cara membandingkan perubahan', guide('Ini waktu dan jumlah interaksi manusia yang benar-benar terjadi dari intake sampai terminal state.', ['Ambil satu low-confidence case yang masuk reviewer queue.', 'Catat waktu aktif reviewer secara terpisah dari waktu case menunggu.', 'Perbandingan dengan alur manual sengaja belum dihitung.'], 'Untuk case ini, dua jenis waktu apa yang harus dipisahkan sebelum dibandingkan dengan baseline?', 'waktu aktif → waktu menunggu → total yang dilaporkan', 'Jangan menghapus handoff dari pengukuran ketika kerja hanya berpindah ke reviewer.')),
+      beat('cost per case', 'ROI sintetis yang terlihat terlalu pasti', 'Cost mencakup model, tools, storage, retries, dan loaded human review time. Manual baseline dan volume memakai data sintetis sehingga tidak boleh diklaim sebagai savings client nyata.', 'Formula, asumsi, sensitivity, dan limitation apa yang wajib terlihat pada simulated ROI?', 'komponen biaya → baseline dan volume → formula simulasi → perubahan asumsi → batas klaim hasil', guide('Ini total biaya pada satu case di boundary yang jelas, termasuk komponen sistem dan kerja manusia yang relevan.', ['Pilih satu case InvoiceOps yang membutuhkan human review.', 'Catat biaya model dan loaded review time sebagai dua komponen awal.', 'Volume, retry, storage, dan sensitivity sengaja belum dimasukkan.'], 'Untuk simulasi awal, dua komponen biaya mana yang lo jumlahkan pada case ini?', 'komponen pertama → komponen kedua → subtotal simulasi', 'Jangan menyebut simulated ROI sebagai savings client nyata.')),
     ],
   ),
   14: story(
     'AI solution engineer yang mengubah dua project menjadi evidence untuk recruiter dan client',
     'RegulaRAG dan InvoiceOps sudah memiliki artifact teknis. Kini lo harus membuat pembaca memahami problem, keputusan, bukti, dan batasannya dalam lima menit.',
     [
-      beat('case study', 'Recruiter membuka README sebelum code', 'Pembaca pertama kali melihat dua repository dan belum mengetahui konteks client. Feature list tidak menjelaskan pain, constraint, atau bukti bahwa sistem bekerja.', 'Urutan informasi apa yang membuat problem, action lo, result, dan evidence dapat dipahami dalam lima menit?', 'konteks problem → peran serta tindakan lo → result → evidence pendukung → urutan penyampaian'),
-      beat('architecture narrative', 'Diagram yang tidak menjelaskan keputusan', 'RegulaRAG memisahkan evidence retrieval dari interpretasi manusia; InvoiceOps memisahkan model extraction dari deterministic calculations dan payment approval. Diagram saja tidak menunjukkan alasan trade-off itu.', 'Bagaimana lo menjelaskan context, alternatives, decision, dan consequence untuk satu keputusan penting?', 'context keputusan → alternatif yang dipertimbangkan → alasan memilih → consequence → evidence pendukung'),
-      beat('limitations', 'Demo sintetis yang terlihat seperti hasil client nyata', 'Evaluation dan ROI memakai data publik atau sintetis. Known failures dan non-goals harus terlihat agar metric tidak berubah menjadi klaim bisnis yang berlebihan.', 'Klaim apa yang boleh dibuat, apa yang harus diberi limitation, dan bukti apa yang masih belum tersedia?', 'claim yang ingin dibuat → evidence yang mendukung → kondisi berlakunya → batasan atau uncertainty → evidence yang masih kurang'),
+      beat('case study', 'Recruiter membuka README sebelum code', 'Pembaca pertama kali melihat dua repository dan belum mengetahui konteks client. Feature list tidak menjelaskan pain, constraint, atau bukti bahwa sistem bekerja.', 'Urutan informasi apa yang membuat problem, action lo, result, dan evidence dapat dipahami dalam lima menit?', 'konteks problem → peran serta tindakan lo → result → evidence pendukung → urutan penyampaian', guide('Ini narasi berbukti yang menghubungkan problem, constraint, keputusan, kontribusi, hasil, dan batas project.', ['Pilih RegulaRAG dan mulai dari lambatnya pencarian sumber serta citation gap.', 'Hubungkan satu keputusan teknis dengan evidence evaluasinya.', 'Result dan limitation yang akan ditonjolkan sengaja belum dipilih.'], 'Satu evidence apa yang paling langsung mendukung problem pembuka RegulaRAG?', 'problem pembuka → evidence pendukung → kenapa relevan', 'Jangan mengubah halaman menjadi feature list tanpa baseline, failure, atau trade-off.')),
+      beat('architecture narrative', 'Diagram yang tidak menjelaskan keputusan', 'RegulaRAG memisahkan evidence retrieval dari interpretasi manusia; InvoiceOps memisahkan model extraction dari deterministic calculations dan payment approval. Diagram saja tidak menunjukkan alasan trade-off itu.', 'Bagaimana lo menjelaskan context, alternatives, decision, dan consequence untuk satu keputusan penting?', 'context keputusan → alternatif yang dipertimbangkan → alasan memilih → consequence → evidence pendukung', guide('Ini cara menjelaskan keputusan sistem melalui context, alternatives, constraint, alasan memilih, dan consequence.', ['Pilih keputusan InvoiceOps untuk memisahkan model extraction dari deterministic calculations.', 'Context-nya: total, tax, dan tolerance harus tetap berupa rules yang dapat diuji.', 'Alternative yang ditolak serta consequence keputusan sengaja belum ditulis.'], 'Apa risiko utama jika calculation rules dipindahkan ke prompt model?', 'pilihan yang ditolak → risiko utamanya → alasan tetap memisahkan', 'Jangan hanya menyebut diagram atau framework tanpa alasan keputusan.')),
+      beat('limitations', 'Demo sintetis yang terlihat seperti hasil client nyata', 'Evaluation dan ROI memakai data publik atau sintetis. Known failures dan non-goals harus terlihat agar metric tidak berubah menjadi klaim bisnis yang berlebihan.', 'Klaim apa yang boleh dibuat, apa yang harus diberi limitation, dan bukti apa yang masih belum tersedia?', 'claim yang ingin dibuat → evidence yang mendukung → kondisi berlakunya → batasan atau uncertainty → evidence yang masih kurang', guide('Ini batas validitas, data gap, failure mode, dan hal yang belum dibuktikan oleh project.', ['Ambil simulated ROI InvoiceOps sebagai satu claim yang perlu dibatasi.', 'Tandai bahwa baseline dan volume berasal dari data sintetis.', 'Claim yang masih aman serta evidence yang belum tersedia sengaja belum dirumuskan.'], 'Kalimat batas apa yang harus menyertai simulated ROI agar tidak terdengar seperti hasil client nyata?', 'jenis data → hal yang belum dibuktikan → batas klaim', 'Jangan menyembunyikan batas agar demo terlihat seperti production result.')),
     ],
   ),
   15: story(
     'AI engineer candidate yang mempertahankan keputusan project dalam interview',
     'Portfolio siap dibaca. Interviewer akan mengubah constraint dan meminta alasan di balik architecture, evaluation, safety, cost, serta rollback.',
     [
-      beat('system design', 'Constraint berubah saat diagram belum selesai', 'Interviewer menaikkan workload atau mengubah reliability requirement. Menyebut framework tidak menjelaskan boundary, state, tool permission, eval, dan recovery.', 'Pertanyaan klarifikasi dan keputusan architecture apa yang lo prioritaskan ketika constraint berubah?', 'constraint awal dan perubahannya → pertanyaan klarifikasi → boundary yang terdampak → keputusan prioritas → trade-off dan cara mengeceknya'),
-      beat('English walkthrough', 'Penjelasan teknis yang kehilangan alur', 'Lo harus menjelaskan problem, evidence, architecture, evaluation, failure, dan limitation dalam working English. Jargon panjang akan sulit dipertahankan saat interviewer bertanya why.', 'Bagaimana lo menyusun walkthrough sepuluh menit dan menjelaskan satu trade-off dalam tiga kalimat sederhana?', 'pembagian waktu → alur problem dan constraint → keputusan serta alasan → evidence dan failure → tiga kalimat trade-off'),
-      beat('STAR stories', 'Aktivitas banyak, kontribusi pribadi tidak terlihat', 'Project mempunyai momen ketika evaluation menemukan citation failure atau failure test menemukan duplicate action. Interviewer perlu memahami situasi, tanggung jawab lo, tindakan, dan result berbukti.', 'Pengalaman mana yang lo pilih dan evidence apa yang membuat action serta result pribadi terlihat jelas?', 'situasi yang dipilih → tanggung jawab pribadi → action spesifik → result terukur → evidence pendukung'),
+      beat('system design', 'Constraint berubah saat diagram belum selesai', 'Interviewer menaikkan workload atau mengubah reliability requirement. Menyebut framework tidak menjelaskan boundary, state, tool permission, eval, dan recovery.', 'Pertanyaan klarifikasi dan keputusan architecture apa yang lo prioritaskan ketika constraint berubah?', 'constraint awal dan perubahannya → pertanyaan klarifikasi → boundary yang terdampak → keputusan prioritas → trade-off dan cara mengeceknya', guide('Ini latihan memilih boundary, data flow, reliability, dan trade-off berdasarkan constraint yang diberikan.', ['Gunakan InvoiceOps lalu ubah satu constraint: workload meningkat.', 'Pertahankan payment approval di Finance Controller sebagai boundary tetap.', 'Komponen yang perlu diubah dan cara mengujinya sengaja belum dipilih.'], 'Saat workload meningkat, komponen mana yang pertama perlu lo ukur sebelum mengubah architecture?', 'constraint yang berubah → komponen yang diukur → signal keputusan', 'Jangan menggambar architecture generik tanpa workload atau failure scenario.')),
+      beat('English walkthrough', 'Penjelasan teknis yang kehilangan alur', 'Lo harus menjelaskan problem, evidence, architecture, evaluation, failure, dan limitation dalam working English. Jargon panjang akan sulit dipertahankan saat interviewer bertanya why.', 'Bagaimana lo menyusun walkthrough sepuluh menit dan menjelaskan satu trade-off dalam tiga kalimat sederhana?', 'pembagian waktu → alur problem dan constraint → keputusan serta alasan → evidence dan failure → tiga kalimat trade-off', guide('Ini penjelasan lisan terstruktur dalam working English yang menjaga alur problem, keputusan, evidence, failure, dan limitation.', ['Pilih RegulaRAG dan buka dengan problem yang sudah terukur.', 'Kalimat awal: “Analysts spend 15–90 minutes finding evidence, and citations are inconsistent.”', 'Architecture trade-off serta limitation sengaja belum dijelaskan.'], 'Dalam satu kalimat English, keputusan apa yang menghubungkan problem itu dengan evidence-grounded assistant?', 'decision in English → reason in English → human boundary in English', 'Jangan menghafal jargon yang tidak bisa lo jelaskan saat ditanya why.')),
+      beat('STAR stories', 'Aktivitas banyak, kontribusi pribadi tidak terlihat', 'Project mempunyai momen ketika evaluation menemukan citation failure atau failure test menemukan duplicate action. Interviewer perlu memahami situasi, tanggung jawab lo, tindakan, dan result berbukti.', 'Pengalaman mana yang lo pilih dan evidence apa yang membuat action serta result pribadi terlihat jelas?', 'situasi yang dipilih → tanggung jawab pribadi → action spesifik → result terukur → evidence pendukung', guide('Ini struktur Situation, Task, Action, Result untuk menunjukkan kontribusi pribadi dengan bukti yang spesifik.', ['Pilih momen ketika failure test InvoiceOps menemukan duplicate action.', 'Tetapkan situasinya sebagai replay event dan tugas lo sebagai menemukan batas yang gagal.', 'Action pribadi serta result terukurnya sengaja belum ditulis.'], 'Apa satu action pribadi yang lo lakukan setelah duplicate action ditemukan?', 'masalah yang ditemukan → action lo → perubahan yang terjadi', 'Jangan menceritakan aktivitas tim panjang tanpa action pribadi atau result berbukti.')),
     ],
   ),
   16: story(
     'AI engineer candidate yang menjalankan pencarian kerja sebagai eksperimen terukur',
     'Lo tidak mengirim aplikasi secara acak. Portfolio evidence menjadi input dan respons market menjadi signal untuk menentukan eksperimen berikutnya.',
     [
-      beat('target roles', 'Judul berbeda, kebutuhan mirip', 'Lowongan memakai title AI Solutions Engineer, Agentic Developer, atau Automation Specialist, tetapi capability yang diminta dapat tumpang tindih. Satu positioning untuk semua role membuat evidence kurang relevan.', 'Bagaimana lo mengelompokkan role berdasarkan problem dan capability, lalu memilih evidence portfolio untuk tiap cluster?', 'aturan pengelompokan lowongan → problem utama tiap kelompok → capability yang dicari → evidence portfolio yang dipasangkan → signal kecocokan'),
-      beat('funnel diagnosis', 'Banyak aplikasi, sedikit pembelajaran', 'Tidak mendapat screening, gagal technical interview, dan gagal final interview menunjukkan kemungkinan bottleneck yang berbeda. Menambah volume saja tidak menjelaskan penyebabnya.', 'Metric dan signal apa yang membedakan masalah targeting, CV, technical depth, dan storytelling?', 'tahap yang diukur → metric konversi → signal kegagalan → dugaan penyebab → cara memvalidasi dugaan'),
-      beat('iteration backlog', 'Semua terasa perlu diperbaiki sekaligus', 'Funnel menghasilkan beberapa gap, sementara waktu lo terbatas. Mempercantik landing page belum tentu mengurangi risiko terbesar jika evidence failure handling masih lemah.', 'Bagaimana lo memprioritaskan eksperimen dua minggu berdasarkan uncertainty, impact, effort, dan learning value?', 'gap atau asumsi → risiko dan impact → effort → learning value → urutan eksperimen dua minggu'),
+      beat('target roles', 'Judul berbeda, kebutuhan mirip', 'Lowongan memakai title AI Solutions Engineer, Agentic Developer, atau Automation Specialist, tetapi capability yang diminta dapat tumpang tindih. Satu positioning untuk semua role membuat evidence kurang relevan.', 'Bagaimana lo mengelompokkan role berdasarkan problem dan capability, lalu memilih evidence portfolio untuk tiap cluster?', 'aturan pengelompokan lowongan → problem utama tiap kelompok → capability yang dicari → evidence portfolio yang dipasangkan → signal kecocokan', guide('Ini cara mengelompokkan lowongan berdasarkan problem dan capability yang diminta, bukan title semata.', ['Ambil dua title: AI Solutions Engineer dan Automation Specialist.', 'Tandai capability overlap yang benar-benar muncul pada deskripsi, bukan dari nama role.', 'Evidence portfolio untuk tiap kelompok sengaja belum dipasangkan.'], 'Untuk satu kelompok yang menekankan workflow automation, evidence mana yang lebih relevan: RegulaRAG atau InvoiceOps?', 'problem kelompok → project yang dipilih → evidence utama', 'Jangan mengirim positioning dan evidence yang sama ke semua lowongan.')),
+      beat('funnel diagnosis', 'Banyak aplikasi, sedikit pembelajaran', 'Tidak mendapat screening, gagal technical interview, dan gagal final interview menunjukkan kemungkinan bottleneck yang berbeda. Menambah volume saja tidak menjelaskan penyebabnya.', 'Metric dan signal apa yang membedakan masalah targeting, CV, technical depth, dan storytelling?', 'tahap yang diukur → metric konversi → signal kegagalan → dugaan penyebab → cara memvalidasi dugaan', guide('Ini cara membaca conversion dan signal pada tiap tahap aplikasi untuk memilih bottleneck yang perlu diuji.', ['Pilih signal tidak mendapat screening.', 'Hubungkan dulu ke area CV atau targeting sebagai hipotesis, bukan kesimpulan.', 'Metric pembanding dan test hipotesis sengaja belum dipilih.'], 'Metric sederhana apa yang menunjukkan apakah perubahan CV meningkatkan screening?', 'jumlah aplikasi relevan → jumlah screening → conversion rate', 'Jangan menambah volume aplikasi tanpa menguji penyebab di tahap yang macet.')),
+      beat('iteration backlog', 'Semua terasa perlu diperbaiki sekaligus', 'Funnel menghasilkan beberapa gap, sementara waktu lo terbatas. Mempercantik landing page belum tentu mengurangi risiko terbesar jika evidence failure handling masih lemah.', 'Bagaimana lo memprioritaskan eksperimen dua minggu berdasarkan uncertainty, impact, effort, dan learning value?', 'gap atau asumsi → risiko dan impact → effort → learning value → urutan eksperimen dua minggu', guide('Ini daftar eksperimen yang diurutkan menurut uncertainty, impact, effort, dan learning value.', ['Bandingkan dua gap: landing page kurang rapi dan evidence failure handling masih lemah.', 'Tandai evidence failure handling sebagai risiko yang lebih dekat ke technical review.', 'Effort serta success signal eksperimennya sengaja belum dinilai.'], 'Dari dua gap itu, mana yang diuji lebih dulu dan signal apa yang menunjukkan perbaikan?', 'gap terpilih → alasan prioritas → signal keberhasilan', 'Jangan mengubah daftar ini menjadi backlog fitur tanpa hypothesis dan success signal.')),
     ],
   ),
 };

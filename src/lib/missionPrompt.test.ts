@@ -4,8 +4,8 @@ import { buildMissionPrompt } from './missionPrompt';
 
 const requiredHeadings = [
   '## YOUR ROLE',
-  '## COACH-FIRST RULES',
-  '## STORY-FIRST PROTOCOL',
+  '## GUIDED COACH RULES',
+  '## GUIDED LEARNING PROTOCOL',
   '## MISSION KIT · CASE REFERENCE',
   "## THIS WEEK'S RAW EVIDENCE",
   "## THIS WEEK'S MISSION",
@@ -63,27 +63,32 @@ describe('buildMissionPrompt', () => {
       expect(first).toContain(week.gate);
       expect(first).toContain(week.mission.deliverable.title);
       expect(first).toContain('DO NOT COMPLETE THE WORK FOR ME');
-      expect(first).toContain('interactive client simulation');
-      expect(first).toContain('Use exactly one story beat per turn');
+      expect(first).toContain('MODE: GUIDED-TO-INDEPENDENT');
+      expect(first).toContain('Every story beat has two stages in order: GUIDED TRY, then INDEPENDENT TRY');
       expect(first).toContain('case-and-concept readback');
-      expect(first).toContain('150–220 words');
-      expect(first).toContain('word limit includes the answer frame and decision question');
-      expect(first).toContain('Format jawaban (3–5 bullet):');
-      expect(first).toContain('It must be the final non-empty line');
-      expect(first).toContain('repeat the exact same Format jawaban line and decision question');
+      expect(first).toContain('180–260 words');
+      expect(first).toContain('**Yang lo pelajari: [concept]**');
+      expect(first).toContain('**Contoh satu langkah**');
+      expect(first).toContain('**Sekarang coba satu langkah**');
+      expect(first).toContain('**Sekarang coba sendiri**');
+      expect(first).toContain('Render every answer-frame slot vertically');
+      expect(first).toContain('Belum diketahui—perlu dicatat');
       expect(first).toContain('**Giliran lo:**');
-      expect(first).toContain('Do not reveal the concept name before I answer');
       expect(first).toContain('## USER CONTROLS');
       expect(first).toContain('ulang adegan');
       expect(first).not.toContain('## INTERMEZZO PROTOCOL');
+      expect(first).not.toContain('Do not reveal the concept name before I answer');
+      expect(first).not.toContain('Concept to reveal only after');
       expect(first).not.toContain('Analogi:');
       expect(first).not.toMatch(/\\$/m);
-      expect(first.match(/^Answer frame: /gm)).toHaveLength(3);
+      expect(first.match(/^Guided meaning: /gm)).toHaveLength(3);
+      expect(first.match(/^Guided micro-question: /gm)).toHaveLength(3);
+      expect(first.match(/^Independent decision question: /gm)).toHaveLength(3);
       for (const heading of requiredHeadings) expect(first).toContain(heading);
     }
   });
 
-  it('places every contextual answer frame between the scene seed and decision question', () => {
+  it('serializes each guided scaffold before its independent check', () => {
     for (const week of roadmapWeeks) {
       const prompt = buildMissionPrompt(week);
 
@@ -95,36 +100,54 @@ describe('buildMissionPrompt', () => {
         const start = prompt.indexOf(heading);
         const end = prompt.indexOf(nextHeading, start + heading.length);
         const block = prompt.slice(start, end);
+        const conceptIndex = block.indexOf(`Concept to teach before asking: ${beat.concept}`);
         const seedIndex = block.indexOf(`Scene seed: ${beat.situation}`);
-        const frameIndex = block.indexOf(`Answer frame: ${beat.answerFrame}`);
-        const questionIndex = block.indexOf(`Decision question: ${beat.decisionQuestion}`);
-        const debriefIndex = block.indexOf('Debrief meaning:');
+        const meaningIndex = block.indexOf(`Guided meaning: ${beat.guided.meaning}`);
+        const workedIndex = block.indexOf('Guided worked step — copy these bullets verbatim:');
+        const microFrameIndex = block.indexOf('Guided micro-answer frame — render these as vertical blanks:');
+        const microQuestionIndex = block.indexOf(`Guided micro-question: ${beat.guided.microQuestion}`);
+        const independentFrameIndex = block.indexOf('Independent answer frame — render these as vertical blanks:');
+        const independentQuestionIndex = block.indexOf(`Independent decision question: ${beat.decisionQuestion}`);
+        const warningIndex = block.indexOf(`Warning after independent success: ${beat.guided.warning}`);
 
         expect(start, `${week.id} beat ${index + 1} heading`).toBeGreaterThanOrEqual(0);
         expect(end, `${week.id} beat ${index + 1} end`).toBeGreaterThan(start);
-        expect(seedIndex).toBeGreaterThanOrEqual(0);
-        expect(frameIndex).toBeGreaterThan(seedIndex);
-        expect(questionIndex).toBeGreaterThan(frameIndex);
-        expect(debriefIndex).toBeGreaterThan(questionIndex);
-        expect(prompt.match(new RegExp(`Answer frame: ${beat.answerFrame.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'))).toHaveLength(1);
+        expect(conceptIndex).toBeGreaterThanOrEqual(0);
+        expect(seedIndex).toBeGreaterThan(conceptIndex);
+        expect(meaningIndex).toBeGreaterThan(seedIndex);
+        expect(workedIndex).toBeGreaterThan(meaningIndex);
+        expect(microFrameIndex).toBeGreaterThan(workedIndex);
+        expect(microQuestionIndex).toBeGreaterThan(microFrameIndex);
+        expect(independentFrameIndex).toBeGreaterThan(microQuestionIndex);
+        expect(independentQuestionIndex).toBeGreaterThan(independentFrameIndex);
+        expect(warningIndex).toBeGreaterThan(independentQuestionIndex);
+
+        for (const item of beat.guided.workedStep) expect(block).toContain(`- ${item}`);
+        for (const slot of beat.guided.microAnswerFrame.split('→')) {
+          expect(block).toContain(`- ${slot.trim()}: [isi lo]`);
+        }
+        for (const slot of beat.answerFrame.split('→')) {
+          expect(block).toContain(`- ${slot.trim()}: [isi lo]`);
+        }
       }
     }
   });
 
-  it('keeps the beginner scaffold structural on first attempt, hint, and replay', () => {
+  it('enforces one-question guided and independent retries', () => {
     for (const week of roadmapWeeks) {
       const prompt = buildMissionPrompt(week);
-      const formatInstruction = prompt.indexOf('Immediately before the final question, write exactly one compact paragraph: Format jawaban');
-      const finalQuestionInstruction = prompt.indexOf('End the scene with exactly one bold prompt: **Giliran lo:**');
 
-      expect(formatInstruction).toBeGreaterThanOrEqual(0);
-      expect(finalQuestionInstruction).toBeGreaterThan(formatInstruction);
-      expect(prompt).toContain('Copy the current beat\'s Answer frame verbatim into that paragraph.');
-      expect(prompt).toContain('Do not translate, paraphrase, or expand it into examples, candidate answers, a solution checklist, new case facts, or the hidden concept name.');
-      expect(prompt).toContain('Insert exactly one blank line between the Format jawaban paragraph and the final question.');
-      expect(prompt).toContain('give one hint, repeat the exact same Format jawaban line and decision question, then stop again');
-      expect(prompt).toContain('“beri hint”, give one directional hint without writing the answer, then end with the exact same Format jawaban line, one blank line, and the same **Giliran lo:** decision question as the final non-empty line; then stop');
-      expect(prompt).toContain('“ulang adegan”, restate the current scene more simply without adding facts, then end with the exact same Format jawaban line, one blank line, and the same **Giliran lo:** decision question as the final non-empty line; then stop');
+      expect(prompt).toContain('Ask exactly one question per reply');
+      expect(prompt).toContain('Never show both questions in the same reply');
+      expect(prompt).toContain('Do not advance or show the independent question');
+      expect(prompt).toContain('present the independent try without another worked example');
+      expect(prompt).toContain('repeat the same guided vertical frame and micro-question');
+      expect(prompt).toContain('repeat the same independent vertical frame and decision question');
+      expect(prompt).toContain('Do not show the independent frame, independent question, deliverable, resources, rubric, later beats, or assessment in a guided reply');
+      expect(prompt).toContain('repeat the current stage\'s vertical frame and same **Giliran lo:** question');
+      expect(prompt).toContain('move only to the next eligible stage after an adequate answer');
+      expect(prompt).toContain('Never compress the slots into an arrow-separated sentence');
+      expect(prompt).toContain('Insert exactly one blank line before the single bold **Giliran lo:** question');
     }
   });
 
@@ -138,14 +161,19 @@ describe('buildMissionPrompt', () => {
     expect(prompt).toContain('35 SOP');
     expect(prompt).toContain('15–90 menit');
     expect(prompt).toContain('at most five high-impact discovery questions');
-    expect(prompt).toContain('Do not rewrite the final artifact for me.');
+    expect(prompt).toContain('without rewriting the final artifact');
     expect(prompt).toContain('/cases/regularag/interview-notes.md');
     expect(prompt).toContain('Problem before solution');
     expect(prompt).toContain('BEAT 1 — Satu pertanyaan, banyak tempat mencari');
-    expect(prompt).toContain('Concept to reveal only after an adequate learner answer: workflow mapping');
-    expect(prompt).toContain('Decision question: Informasi dan langkah apa yang perlu lo catat');
-    expect(prompt).toContain('Answer frame: hal yang ingin diamati → catatan yang dikumpulkan → alasan catatan itu berguna');
-    expect(prompt).toContain('Do not reveal the concept, explain terminology, provide an example answer, or request the deliverable.');
+    expect(prompt).toContain('Concept to teach before asking: workflow mapping');
+    expect(prompt).toContain('Guided meaning: Workflow mapping adalah peta urutan kerja dari pemicu sampai hasil.');
+    expect(prompt).toContain('- Pelaku: compliance analyst.');
+    expect(prompt).toContain('- Belum diketahui: berapa lama tiket menunggu sebelum diambil.');
+    expect(prompt).toContain('Guided micro-question: Setelah analyst membaca pertanyaan, tindakan berikutnya apa yang terlihat?');
+    expect(prompt).toContain('- pelaku: [isi lo]');
+    expect(prompt).toContain('- hal yang belum diketahui: [isi lo]');
+    expect(prompt).toContain('Independent decision question: Informasi dan langkah apa yang perlu lo catat');
+    expect(prompt).toContain('Do not show the independent frame, independent question, deliverable, resources, rubric, later beats, or assessment in a guided reply.');
   });
 
   it('keeps case continuity across discovery, delivery, and career weeks', () => {
