@@ -14,7 +14,7 @@ Every week follows the same delivery practice:
 
 `Learn → Inspect client evidence → Attempt solo → AI review → Revise → Pass gate → Ship`
 
-The AI is deliberately constrained to act as a tutor, coach, and client simulator. It teaches the week's concepts in Bahasa Indonesia with a case example and anti-pattern, checks understanding in the learner's own words, then asks for a draft. It asks no more than five discovery questions, scores a visible rubric, and returns a revision checklist instead of completing the final artifact.
+The AI is deliberately constrained to act as a tutor, coach, and client simulator. It gives every client scene a short, contextual answer frame so a beginner can start reasoning without being handed the answer, then teaches the concept through feedback on that attempt. It asks no more than five discovery questions, scores a visible rubric, and returns a revision checklist instead of completing the final artifact.
 
 ## What this repository proves
 
@@ -28,7 +28,7 @@ The AI is deliberately constrained to act as a tutor, coach, and client simulato
 
 - Mission Control with start date, automatically calculated current week, progress, and next milestone.
 - Clickable delivery loop: `Discover → Design → Orchestrate → Evaluate → Operate → Prove`.
-- Sixteen story-first missions that place the learner in a client scene, wait for a decision, reveal the concept through feedback, and only then move toward the weekly deliverable.
+- Sixteen story-first missions with 48 contextual answer frames that place the learner in a client scene, provide a neutral response shape, wait for a decision, reveal the concept through feedback, and only then move toward the weekly deliverable.
 - Collapsible Mission Kits with official learning resources, synthetic client evidence, downloadable starter files, deliverable specifications, visible rubrics, and quality gates.
 - A deterministic **Copy full mission** prompt that includes the case, evidence, constraints, files, output format, rubric, and coach-first protocol—ready for a new AI chat.
 - A structured **Mission Debrief** receipt for every week: paste the AI review, validate it against that week's rubric, inspect or edit the preview, then save it locally.
@@ -84,7 +84,7 @@ pnpm test
 pnpm build
 ```
 
-The GitHub Actions workflow runs the same checks on every push and pull request. Tests validate all 16 case assignments, story-beat order, resource limits, prompt completeness and determinism, assessment markers and rubric identities, strict paste validation, corrupted-storage recovery, equal weekly weighting, the 80/20 readiness formula, nine capability mappings, safety-floor behavior, final-report unlock rules, starter-file existence, roadmap structure, and legacy progress parsing.
+The GitHub Actions workflow runs the same checks on every push and pull request. Tests validate all 16 case assignments, 48 unique non-leaking answer frames, story-beat order, resource limits, prompt completeness and determinism, assessment markers and rubric identities, strict paste validation, corrupted-storage recovery, equal weekly weighting, the 80/20 readiness formula, nine capability mappings, safety-floor behavior, final-report unlock rules, starter-file existence, roadmap structure, and legacy progress parsing.
 
 ## Deployment
 
