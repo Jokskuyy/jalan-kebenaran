@@ -12,9 +12,16 @@ const expectedCases: Record<number, CaseId[]> = {
   16: ['regularag', 'invoiceops'],
 };
 
+function normalizeStoryText(value: string) {
+  return value.normalize('NFKC').toLocaleLowerCase('en-US').replace(/\s+/g, ' ').trim();
+}
+
 describe('roadmap data', () => {
   it('contains sixteen sequential weeks with complete delivery fields', () => {
+    const storyBeats = roadmapWeeks.flatMap((week) => week.mission.story.beats);
     expect(roadmapWeeks).toHaveLength(16);
+    expect(storyBeats).toHaveLength(48);
+    expect(new Set(storyBeats.map((beat) => normalizeStoryText(beat.answerFrame))).size).toBe(48);
     expect(roadmapWeeks.map((week) => week.week)).toEqual(
       Array.from({ length: 16 }, (_, index) => index + 1),
     );
@@ -37,10 +44,19 @@ describe('roadmap data', () => {
       expect(week.mission.story.beats.map((beat) => beat.concept)).toEqual(week.concepts);
 
       for (const beat of week.mission.story.beats) {
+        const answerSlots = beat.answerFrame.split('→').map((slot) => slot.trim());
         expect(beat.title.trim()).not.toBe('');
         expect(beat.situation.trim()).not.toBe('');
         expect(beat.decisionQuestion.trim()).not.toBe('');
-        expect(beat.title.toLowerCase()).not.toContain(beat.concept.toLowerCase());
+        expect(beat.answerFrame.trim()).not.toBe('');
+        expect(beat.answerFrame.length).toBeLessThanOrEqual(180);
+        expect(beat.answerFrame).not.toContain('\n');
+        expect(answerSlots.length).toBeGreaterThanOrEqual(3);
+        expect(answerSlots.length).toBeLessThanOrEqual(5);
+        expect(answerSlots.every(Boolean)).toBe(true);
+        expect(normalizeStoryText(beat.title)).not.toContain(normalizeStoryText(beat.concept));
+        expect(normalizeStoryText(beat.answerFrame)).not.toContain(normalizeStoryText(beat.concept));
+        expect(beat.answerFrame).not.toMatch(/\b(contoh|misalnya|jawaban (?:final|jadi|benar))\b/i);
       }
     }
   });
