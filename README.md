@@ -12,9 +12,9 @@ AGENT/16 is an interactive, mission-based 16-week operating system for an inform
 
 Every week follows the same delivery practice:
 
-`Understand → See one step → Guided try → Independent try → Build draft → Review → Ship`
+`Plain language → Work vocabulary → See one part → Small guided task → Independent try → Build → Review and ship`
 
-The AI is deliberately constrained to act as a tutor, coach, and client simulator. It explains each concept first, demonstrates one partial step grounded in the same synthetic case, guides one smaller attempt, and then removes the extra scaffolding for an independent try. It asks no more than five discovery questions, scores a visible rubric, and returns a revision checklist instead of completing the learner's draft or final artifact.
+The AI is deliberately constrained to act as a tutor, coach, and client simulator. It explains an idea in everyday Indonesian before introducing its industry term, demonstrates one partial step grounded in the same synthetic case, guides one small attempt, and then removes the extra scaffolding for an independent try. It asks no more than five discovery questions, scores a visible rubric, and returns a revision checklist instead of completing the learner's draft or final artifact.
 
 ## What this repository proves
 
@@ -28,7 +28,7 @@ The AI is deliberately constrained to act as a tutor, coach, and client simulato
 
 - Mission Control with start date, automatically calculated current week, progress, and next milestone.
 - Clickable delivery loop: `Discover → Design → Orchestrate → Evaluate → Operate → Prove`.
-- Sixteen guided-to-independent missions with 48 curated same-case worked steps, micro-answer frames, and independent checks.
+- Sixteen beginner-friendly missions with 48 curated, same-case worked steps, plain-language concept labels, small guided tasks, and independent checks.
 - Collapsible Mission Kits with official learning resources, synthetic client evidence, downloadable starter files, deliverable specifications, visible rubrics, and quality gates.
 - A deterministic **Copy guided mission** prompt that includes the case, evidence, constraints, files, output format, rubric, and complete guided-learning state machine—ready for a new AI chat.
 - A structured **Mission Debrief** receipt for every week: paste the AI review, validate it against that week's rubric, inspect or edit the preview, then save it locally.
@@ -84,7 +84,7 @@ pnpm test
 pnpm build
 ```
 
-The GitHub Actions workflow runs the same checks on every push and pull request. Tests validate all 16 case assignments, 48 complete guided scaffolds, same-case worked steps, vertical response frames, guided-to-independent state transitions, resource limits, prompt completeness and determinism, assessment markers and rubric identities, strict paste validation, corrupted-storage recovery, equal weekly weighting, the 80/20 readiness formula, nine capability mappings, safety-floor behavior, final-report unlock rules, starter-file existence, roadmap structure, and legacy progress parsing.
+The GitHub Actions workflow runs the same checks on every push and pull request. Tests validate all 16 case assignments, 48 complete beginner-friendly scaffolds, Indonesian-first concept labels, bounded work vocabulary, task-aligned response fields, same-case worked steps, guided-to-independent state transitions, resource limits, prompt completeness and determinism, assessment markers and rubric identities, strict paste validation, corrupted-storage recovery, equal weekly weighting, the 80/20 readiness formula, nine capability mappings, safety-floor behavior, final-report unlock rules, starter-file existence, roadmap structure, and legacy progress parsing.
 
 ## Deployment
 

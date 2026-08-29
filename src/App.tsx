@@ -17,6 +17,7 @@ import { useProgress } from './hooks/useProgress';
 import { useAssessments } from './hooks/useAssessments';
 import { copyText } from './lib/clipboard';
 import { buildFinalReport, buildReportMarkdown, calculateWeeklyScore } from './lib/assessment';
+import { formatConceptLabel } from './lib/conceptLabels';
 import { buildMissionPrompt } from './lib/missionPrompt';
 
 const applicationCadence = [
@@ -27,13 +28,13 @@ const applicationCadence = [
 ];
 
 const weeklyFlow = [
-  ['01', 'Understand'],
-  ['02', 'See one step'],
-  ['03', 'Guided try'],
-  ['04', 'Independent try'],
-  ['05', 'Build draft'],
-  ['06', 'Review'],
-  ['07', 'Ship'],
+  ['01', 'Bahasa awam'],
+  ['02', 'Istilah kerja'],
+  ['03', 'Lihat satu bagian'],
+  ['04', 'Coba tugas kecil'],
+  ['05', 'Coba mandiri'],
+  ['06', 'Buat draft'],
+  ['07', 'Review + ship'],
 ];
 
 const timeBudget = [
@@ -304,8 +305,9 @@ function App() {
             <p className="eyebrow">HOW TO RUN EVERY WEEK</p>
             <h2 id="weekly-system-title">Jangan mulai dari prompt kosong.</h2>
             <p>
-              AI menjelaskan konsep, memperagakan satu langkah dari kasus yang sama, lalu mengurangi
-              bantuan sampai lo bisa mencoba sendiri. Artifact final tetap hasil keputusan dan revisi lo.
+              Mulai dari bahasa awam, lalu kenali istilah yang dipakai di dunia kerja. AI menunjukkan
+              satu bagian kecil, mendampingi satu tugas, lalu mengurangi bantuan sampai lo bisa mencoba
+              sendiri. Hasil akhir tetap berasal dari keputusan dan revisi lo.
             </p>
           </div>
 
@@ -330,7 +332,7 @@ function App() {
 
           <div className="coach-boundary">
             <span>AI COACH BOUNDARY</span>
-            <p>AI boleh memperagakan satu langkah kecil, bertanya, mengkritik, menguji failure mode, dan memberi rubric score. AI tidak boleh menulis draft atau final deliverable untuk lo.</p>
+            <p>AI boleh menjelaskan istilah baru, memperagakan satu bagian kecil, bertanya, mengkritik, menguji kondisi gagal, dan memberi nilai dengan kriteria penilaian (rubric). AI tidak boleh menulis draft atau hasil akhir untuk lo.</p>
           </div>
         </section>
 
@@ -408,16 +410,20 @@ function App() {
                     </p>
 
                     <div className="concept-list" aria-label="Konsep minggu ini">
-                      {week.concepts.map((concept) => <span key={concept}>{concept}</span>)}
+                      {week.mission.story.beats.map((beat) => (
+                        <span key={beat.concept}>
+                          {formatConceptLabel(beat.guided.plainConcept, beat.concept)}
+                        </span>
+                      ))}
                     </div>
 
                     <div className="mission-start">
                       <span>START HERE · BELUM PERLU JAWABAN FINAL</span>
-                      <strong>AI menjelaskan konsep, menunjukkan satu langkah, lalu mendampingi lo sampai bisa mencoba sendiri.</strong>
+                      <strong>Mulai dari makna sederhananya. Istilah kerja dikenalkan setelah konteksnya jelas.</strong>
                       <p>
                         Buka Mission Kit <b>{week.mission.caseIds.map((caseId) => caseDossiers[caseId].title).join(' + ')}</b>{' '}
-                        untuk melihat context dan evidence. Klik <b>Copy guided mission</b>, tempel ke chat AI baru,
-                        lalu ikuti guided try sebelum membuat draft <b>{week.mission.deliverable.title}</b>.
+                        untuk melihat cerita kasus dan bukti yang tersedia. Klik <b>Copy guided mission</b>, tempel ke chat AI baru,
+                        lalu ikuti tugas kecil sebelum membuat draft <b>{week.mission.deliverable.title}</b>.
                       </p>
                     </div>
 
@@ -426,7 +432,7 @@ function App() {
                     <div className="mission-launch">
                       <div>
                         <span>START COACHING LOOP</span>
-                        <strong>Salin satu prompt mandiri, lalu tempel ke chat AI baru.</strong>
+                        <strong>Salin panduan belajar lengkap, lalu tempel ke chat AI baru.</strong>
                       </div>
                       <button className="copy-button" type="button" onClick={() => copyMission(week)}>
                         {copiedWeekId === week.id ? 'Guided mission disalin ✓' : 'Copy guided mission'}

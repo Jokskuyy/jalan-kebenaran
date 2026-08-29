@@ -1,5 +1,6 @@
 import { caseDossiers } from '../data/missions';
 import type { RoadmapWeek } from '../data/roadmap';
+import { formatConceptLabel } from '../lib/conceptLabels';
 
 type WeeklyMissionDossierProps = {
   week: RoadmapWeek;
@@ -14,7 +15,7 @@ export function WeeklyMissionDossier({ week }: WeeklyMissionDossierProps) {
       <summary>
         <span>MISSION KIT</span>
         <strong>{caseLabel}</strong>
-        <em>Open context + files ↘</em>
+        <em>Buka cerita + file ↘</em>
       </summary>
 
       <div className="mission-dossier__body">
@@ -30,15 +31,15 @@ export function WeeklyMissionDossier({ week }: WeeklyMissionDossierProps) {
             </div>
             <div>
               <dt>MISSION THIS WEEK</dt>
-              <dd>{week.clientOutcome} Deliverable: {week.mission.deliverable.title}.</dd>
+              <dd>{week.clientOutcome} Hasil yang dibuat (deliverable): {week.mission.deliverable.title}.</dd>
             </div>
             <div>
               <dt>YOUR FIRST MOVE</dt>
-              <dd>Buka evidence dan starter brief, lalu klik Copy guided mission dan tempel ke chat AI baru.</dd>
+              <dd>Buka cerita kasus dan bukti yang tersedia, lalu klik Copy guided mission dan tempel ke chat AI baru.</dd>
             </div>
             <div>
               <dt>AI WILL</dt>
-              <dd>Menjelaskan konsep, memperagakan satu langkah kasus, meminta micro-answer, lalu mengurangi bantuan.</dd>
+              <dd>Menjelaskan dengan bahasa awam, mengenalkan istilah kerja, menunjukkan satu bagian, lalu mendampingi tugas kecil sebelum lo mencoba sendiri.</dd>
             </div>
             <div>
               <dt>DONE WHEN</dt>
@@ -58,8 +59,14 @@ export function WeeklyMissionDossier({ week }: WeeklyMissionDossierProps) {
           <div className="mission-panel__content">
             <div className="teach-first">
               <strong>GUIDED LEARNING PROTOCOL</strong>
-              <p>AI menyebut dan menjelaskan konsep, menunjukkan satu partial worked step dari kasus yang sama, lalu meminta lo melanjutkan satu langkah sebelum mencoba keputusan utuh secara mandiri.</p>
-              <div>{week.concepts.map((concept) => <span key={concept}>{concept}</span>)}</div>
+              <p>Bahasa awam → istilah kerja → contoh satu bagian → tugas kecil → coba mandiri (independent try). AI memberi bantuan sedikit demi sedikit, bukan langsung meminta jawaban final.</p>
+              <div>
+                {week.mission.story.beats.map((beat) => (
+                  <span key={beat.concept}>
+                    {formatConceptLabel(beat.guided.plainConcept, beat.concept)}
+                  </span>
+                ))}
+              </div>
             </div>
             <div className="resource-list">
               {week.mission.resources.map((resource) => (
@@ -78,7 +85,7 @@ export function WeeklyMissionDossier({ week }: WeeklyMissionDossierProps) {
           <summary>
             <span>02</span>
             <div>
-              <p>INSPECT · CLIENT EVIDENCE</p>
+              <p>INSPECT · BUKTI DARI CLIENT</p>
               <h4 id={`${week.id}-case`}>Pahami kondisi client sebelum merancang solusi.</h4>
             </div>
           </summary>
@@ -96,7 +103,7 @@ export function WeeklyMissionDossier({ week }: WeeklyMissionDossierProps) {
               ))}
             </div>
             <div className="raw-evidence">
-              <strong>THIS WEEK'S RAW EVIDENCE</strong>
+              <strong>BUKTI MENTAH MINGGU INI</strong>
               <ul>{week.mission.rawEvidence.map((item) => <li key={item}>{item}</li>)}</ul>
             </div>
           </div>
@@ -145,7 +152,7 @@ export function WeeklyMissionDossier({ week }: WeeklyMissionDossierProps) {
             </div>
             <div className="coach-rule">
               <strong>COACH PROTOCOL</strong>
-              <p>AI boleh memperagakan satu langkah kecil, tetapi wajib menunggu draft lo sebelum review, bertanya maksimal lima kali, memberi skor dan revision checklist, serta tidak menulis artifact final.</p>
+              <p>AI boleh menjelaskan istilah baru dan memperagakan satu bagian kecil, tetapi wajib menunggu draft lo sebelum review, bertanya maksimal lima kali, memberi skor dan daftar revisi, serta tidak menulis hasil akhir.</p>
             </div>
           </div>
         </details>
@@ -155,7 +162,7 @@ export function WeeklyMissionDossier({ week }: WeeklyMissionDossierProps) {
             <span>05</span>
             <div>
               <p>STARTER FILES · DOWNLOAD</p>
-              <h4 id={`${week.id}-files`}>Raw evidence dan template untuk mulai bekerja.</h4>
+              <h4 id={`${week.id}-files`}>Bukti mentah dan template untuk mulai bekerja.</h4>
             </div>
           </summary>
           <div className="mission-panel__content">

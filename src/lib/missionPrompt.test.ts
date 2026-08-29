@@ -57,7 +57,8 @@ describe('buildMissionPrompt', () => {
       const second = buildMissionPrompt(week);
 
       expect(first).toBe(second);
-      expect(first).not.toMatch(/undefined|null|\[object Object\]/);
+      expect(first).not.toContain('undefined');
+      expect(first).not.toContain('[object Object]');
       expect(first.match(/\[TEMPEL DRAFT LO DI SINI\]/g)).toHaveLength(1);
       expect(first).toContain(week.title);
       expect(first).toContain(week.gate);
@@ -66,12 +67,13 @@ describe('buildMissionPrompt', () => {
       expect(first).toContain('MODE: GUIDED-TO-INDEPENDENT');
       expect(first).toContain('Every story beat has two stages in order: GUIDED TRY, then INDEPENDENT TRY');
       expect(first).toContain('case-and-concept readback');
-      expect(first).toContain('180–260 words');
-      expect(first).toContain('**Yang lo pelajari: [concept]**');
-      expect(first).toContain('**Contoh satu langkah**');
-      expect(first).toContain('**Sekarang coba satu langkah**');
+      expect(first).toContain('140–210 words');
+      expect(first).toContain('**Yang lo pelajari: [display concept label]**');
+      expect(first).toContain('**Contoh satu bagian**');
+      expect(first).toContain('**Tugas kecil lo: [task label]**');
       expect(first).toContain('**Sekarang coba sendiri**');
-      expect(first).toContain('Render every answer-frame slot vertically');
+      expect(first).toContain('plain meaning first and industry term in parentheses');
+      expect(first).toContain('Guided try has 1–3 fields');
       expect(first).toContain('Belum diketahui—perlu dicatat');
       expect(first).toContain('**Giliran lo:**');
       expect(first).toContain('## USER CONTROLS');
@@ -80,10 +82,12 @@ describe('buildMissionPrompt', () => {
       expect(first).not.toContain('Do not reveal the concept name before I answer');
       expect(first).not.toContain('Concept to reveal only after');
       expect(first).not.toContain('Analogi:');
+      expect(first).not.toContain('→ [');
       expect(first).not.toMatch(/\\$/m);
-      expect(first.match(/^Guided meaning: /gm)).toHaveLength(3);
-      expect(first.match(/^Guided micro-question: /gm)).toHaveLength(3);
-      expect(first.match(/^Independent decision question: /gm)).toHaveLength(3);
+      expect(first.match(/^Plain concept label: /gm)).toHaveLength(3);
+      expect(first.match(/^Guided question: /gm)).toHaveLength(3);
+      expect(first.match(/^Independent question: /gm)).toHaveLength(3);
+      expect(first.match(/^Guided task label: /gm)).toHaveLength(3);
       for (const heading of requiredHeadings) expect(first).toContain(heading);
     }
   });
@@ -100,35 +104,42 @@ describe('buildMissionPrompt', () => {
         const start = prompt.indexOf(heading);
         const end = prompt.indexOf(nextHeading, start + heading.length);
         const block = prompt.slice(start, end);
-        const conceptIndex = block.indexOf(`Concept to teach before asking: ${beat.concept}`);
-        const seedIndex = block.indexOf(`Scene seed: ${beat.situation}`);
-        const meaningIndex = block.indexOf(`Guided meaning: ${beat.guided.meaning}`);
+        const plainConceptIndex = block.indexOf(`Plain concept label: ${beat.guided.plainConcept}`);
+        const conceptIndex = block.indexOf(`Industry concept: ${beat.concept}`);
+        const displayConceptIndex = block.indexOf('Display concept label — copy exactly:');
+        const seedIndex = block.indexOf(`Scene seed — rewrite in everyday Indonesian: ${beat.situation}`);
+        const meaningIndex = block.indexOf(`Meaning — explain without unexplained jargon: ${beat.guided.meaning}`);
+        const glossIndex = block.indexOf('Terms to introduce inline exactly once');
         const workedIndex = block.indexOf('Guided worked step — copy these bullets verbatim:');
-        const microFrameIndex = block.indexOf('Guided micro-answer frame — render these as vertical blanks:');
-        const microQuestionIndex = block.indexOf(`Guided micro-question: ${beat.guided.microQuestion}`);
-        const independentFrameIndex = block.indexOf('Independent answer frame — render these as vertical blanks:');
-        const independentQuestionIndex = block.indexOf(`Independent decision question: ${beat.decisionQuestion}`);
+        const taskIndex = block.indexOf(`Guided task label:`);
+        const guidedFrameIndex = block.indexOf('Guided answer fields — render as vertical blanks:');
+        const guidedQuestionIndex = block.indexOf(`Guided question: ${beat.guided.guidedTry.question}`);
+        const independentFrameIndex = block.indexOf('Independent answer fields — render as vertical blanks:');
+        const independentQuestionIndex = block.indexOf(`Independent question: ${beat.independentTry.question}`);
         const warningIndex = block.indexOf(`Warning after independent success: ${beat.guided.warning}`);
 
         expect(start, `${week.id} beat ${index + 1} heading`).toBeGreaterThanOrEqual(0);
         expect(end, `${week.id} beat ${index + 1} end`).toBeGreaterThan(start);
-        expect(conceptIndex).toBeGreaterThanOrEqual(0);
-        expect(seedIndex).toBeGreaterThan(conceptIndex);
+        expect(plainConceptIndex).toBeGreaterThanOrEqual(0);
+        expect(conceptIndex).toBeGreaterThan(plainConceptIndex);
+        expect(displayConceptIndex).toBeGreaterThan(conceptIndex);
+        expect(seedIndex).toBeGreaterThan(displayConceptIndex);
         expect(meaningIndex).toBeGreaterThan(seedIndex);
-        expect(workedIndex).toBeGreaterThan(meaningIndex);
-        expect(microFrameIndex).toBeGreaterThan(workedIndex);
-        expect(microQuestionIndex).toBeGreaterThan(microFrameIndex);
-        expect(independentFrameIndex).toBeGreaterThan(microQuestionIndex);
+        expect(glossIndex).toBeGreaterThan(meaningIndex);
+        expect(workedIndex).toBeGreaterThan(glossIndex);
+        expect(taskIndex).toBeGreaterThan(workedIndex);
+        expect(guidedFrameIndex).toBeGreaterThan(taskIndex);
+        expect(guidedQuestionIndex).toBeGreaterThan(guidedFrameIndex);
+        expect(independentFrameIndex).toBeGreaterThan(guidedQuestionIndex);
         expect(independentQuestionIndex).toBeGreaterThan(independentFrameIndex);
         expect(warningIndex).toBeGreaterThan(independentQuestionIndex);
 
         for (const item of beat.guided.workedStep) expect(block).toContain(`- ${item}`);
-        for (const slot of beat.guided.microAnswerFrame.split('→')) {
-          expect(block).toContain(`- ${slot.trim()}: [isi lo]`);
+        for (const entry of beat.guided.termGlosses) {
+          expect(block).toContain(`- ${entry.plainMeaning} (${entry.term})`);
         }
-        for (const slot of beat.answerFrame.split('→')) {
-          expect(block).toContain(`- ${slot.trim()}: [isi lo]`);
-        }
+        for (const field of beat.guided.guidedTry.fields) expect(block).toContain(`- ${field}: [isi lo]`);
+        for (const field of beat.independentTry.fields) expect(block).toContain(`- ${field}: [isi lo]`);
       }
     }
   });
@@ -138,15 +149,14 @@ describe('buildMissionPrompt', () => {
       const prompt = buildMissionPrompt(week);
 
       expect(prompt).toContain('Ask exactly one question per reply');
-      expect(prompt).toContain('Never show both questions in the same reply');
+      expect(prompt).toContain('Never show both questions in one reply');
       expect(prompt).toContain('Do not advance or show the independent question');
       expect(prompt).toContain('present the independent try without another worked example');
-      expect(prompt).toContain('repeat the same guided vertical frame and micro-question');
-      expect(prompt).toContain('repeat the same independent vertical frame and decision question');
-      expect(prompt).toContain('Do not show the independent frame, independent question, deliverable, resources, rubric, later beats, or assessment in a guided reply');
-      expect(prompt).toContain('repeat the current stage\'s vertical frame and same **Giliran lo:** question');
+      expect(prompt).toContain('repeat the same task label, guided fields, and question');
+      expect(prompt).toContain('repeat the same 3–5 independent fields and question');
+      expect(prompt).toContain('Do not show the independent fields, independent question, deliverable, resources, rubric, later beats, or assessment in a guided reply');
+      expect(prompt).toContain('repeat the current task label, same fields, and same **Giliran lo:** question');
       expect(prompt).toContain('move only to the next eligible stage after an adequate answer');
-      expect(prompt).toContain('Never compress the slots into an arrow-separated sentence');
       expect(prompt).toContain('Insert exactly one blank line before the single bold **Giliran lo:** question');
     }
   });
@@ -165,21 +175,90 @@ describe('buildMissionPrompt', () => {
     expect(prompt).toContain('/cases/regularag/interview-notes.md');
     expect(prompt).toContain('Problem before solution');
     expect(prompt).toContain('BEAT 1 — Satu pertanyaan, banyak tempat mencari');
-    expect(prompt).toContain('Concept to teach before asking: workflow mapping');
-    expect(prompt).toContain('Guided meaning: Workflow mapping adalah peta urutan kerja dari pemicu sampai hasil.');
-    expect(prompt).toContain('- Pelaku: compliance analyst.');
-    expect(prompt).toContain('- Belum diketahui: berapa lama tiket menunggu sebelum diambil.');
-    expect(prompt).toContain('Guided micro-question: Setelah analyst membaca pertanyaan, tindakan berikutnya apa yang terlihat?');
-    expect(prompt).toContain('- pelaku: [isi lo]');
-    expect(prompt).toContain('- hal yang belum diketahui: [isi lo]');
-    expect(prompt).toContain('Independent decision question: Informasi dan langkah apa yang perlu lo catat');
-    expect(prompt).toContain('Do not show the independent frame, independent question, deliverable, resources, rubric, later beats, or assessment in a guided reply.');
+    expect(prompt).toContain('Display concept label — copy exactly: peta alur kerja (workflow mapping)');
+    expect(prompt).toContain('- pertanyaan kerja yang dicatat dan dilacak sampai selesai (ticket)');
+    expect(prompt).toContain('- staf kepatuhan (compliance analyst)');
+    expect(prompt).toContain('- kotak masuk bersama (shared inbox)');
+    expect(prompt).toContain('- Siapa yang bekerja: staf kepatuhan.');
+    expect(prompt).toContain('Guided task label: Cari fakta dari cerita');
+    expect(prompt).toContain('Guided question: Berdasarkan cerita, apa yang terjadi setelah staf kepatuhan membaca pertanyaan?');
+    expect(prompt).toContain('- langkah berikutnya: [isi lo]');
+    expect(prompt).toContain('- tempat mencari informasi: [isi lo]');
+    expect(prompt).toContain('- orang yang mungkin dimintai bantuan: [isi lo]');
+    expect(prompt).toContain('Independent question: Untuk memetakan seluruh alur');
+    expect(prompt).toContain('Do not show the independent fields, independent question, deliverable, resources, rubric, later beats, or assessment in a guided reply.');
+  });
+
+  it('locks representative beginner fixtures across discovery, engineering, and career weeks', () => {
+    const fixtures = [
+      {
+        week: 1,
+        plainConcept: 'peta alur kerja (workflow mapping)',
+        terms: ['ticket', 'compliance analyst', 'shared inbox'],
+        taskKind: 'find-evidence',
+        fields: ['langkah berikutnya', 'tempat mencari informasi', 'orang yang mungkin dimintai bantuan'],
+      },
+      {
+        week: 3,
+        plainConcept: 'keluaran dengan bentuk tetap (structured output)',
+        terms: ['field', 'JSON', 'citation'],
+        taskKind: 'make-decision',
+        fields: ['bagian penghubung', 'hasil saat hilang'],
+      },
+      {
+        week: 6,
+        plainConcept: 'gabungan pencarian kata dan makna (hybrid search)',
+        terms: ['lexical search', 'semantic search', 'hybrid search'],
+        taskKind: 'make-decision',
+        fields: ['cara pencarian', 'alasan'],
+      },
+      {
+        week: 9,
+        plainConcept: 'membaca jejak proses (process mining)',
+        terms: ['invoice', 'purchase order / PO', 'goods receipt'],
+        taskKind: 'explain',
+        fields: ['waktu mulai', 'waktu selesai', 'selisih waktu'],
+      },
+      {
+        week: 12,
+        plainConcept: 'aman saat permintaan diulang (idempotency)',
+        terms: ['idempotency key', 'replay', 'at-least-once delivery'],
+        taskKind: 'make-decision',
+        fields: ['data yang diperiksa', 'keputusan sementara'],
+      },
+      {
+        week: 15,
+        plainConcept: 'latihan merancang sistem (system design)',
+        terms: ['workload', 'reliability', 'rollback'],
+        taskKind: 'make-decision',
+        fields: ['bagian yang diukur', 'petunjuk yang dicari'],
+      },
+      {
+        week: 16,
+        plainConcept: 'kelompok peran sasaran (target roles)',
+        terms: ['role cluster', 'capability', 'positioning'],
+        taskKind: 'find-evidence',
+        fields: ['proyek', 'bukti utama'],
+      },
+    ] as const;
+
+    for (const fixture of fixtures) {
+      const beat = roadmapWeeks[fixture.week - 1].mission.story.beats[0];
+      const prompt = buildMissionPrompt(roadmapWeeks[fixture.week - 1]);
+
+      expect(beat.guided.plainConcept).toBe(fixture.plainConcept);
+      expect(beat.guided.termGlosses.map((entry) => entry.term)).toEqual(fixture.terms);
+      expect(beat.guided.taskKind).toBe(fixture.taskKind);
+      expect(beat.guided.guidedTry.fields).toEqual(fixture.fields);
+      expect(prompt).toContain(`Display concept label — copy exactly: ${fixture.plainConcept}`);
+      for (const field of fixture.fields) expect(prompt).toContain(`- ${field}: [isi lo]`);
+    }
   });
 
   it('keeps case continuity across discovery, delivery, and career weeks', () => {
     const invoicePrompt = buildMissionPrompt(roadmapWeeks[8]);
     expect(invoicePrompt).toContain('InvoiceOps Agent');
-    expect(invoicePrompt).toContain('BEAT 1 — Invoice yang berpindah tanpa jejak terpadu');
+    expect(invoicePrompt).toContain('BEAT 1 — Tagihan berpindah tanpa jejak yang utuh');
 
     for (const weekNumber of [14, 15, 16]) {
       const prompt = buildMissionPrompt(roadmapWeeks[weekNumber - 1]);

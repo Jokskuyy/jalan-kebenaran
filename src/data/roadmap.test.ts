@@ -21,8 +21,8 @@ describe('roadmap data', () => {
     const storyBeats = roadmapWeeks.flatMap((week) => week.mission.story.beats);
     expect(roadmapWeeks).toHaveLength(16);
     expect(storyBeats).toHaveLength(48);
-    expect(new Set(storyBeats.map((beat) => normalizeStoryText(beat.answerFrame))).size).toBe(48);
-    expect(new Set(storyBeats.map((beat) => normalizeStoryText(beat.guided.microQuestion))).size).toBe(48);
+    expect(new Set(storyBeats.map((beat) => normalizeStoryText(beat.independentTry.question))).size).toBe(48);
+    expect(new Set(storyBeats.map((beat) => normalizeStoryText(beat.guided.guidedTry.question))).size).toBe(48);
     expect(roadmapWeeks.map((week) => week.week)).toEqual(
       Array.from({ length: 16 }, (_, index) => index + 1),
     );
@@ -45,42 +45,49 @@ describe('roadmap data', () => {
       expect(week.mission.story.beats.map((beat) => beat.concept)).toEqual(week.concepts);
 
       for (const beat of week.mission.story.beats) {
-        const answerSlots = beat.answerFrame.split('→').map((slot) => slot.trim());
-        const microSlots = beat.guided.microAnswerFrame.split('→').map((slot) => slot.trim());
         const meaningSentences = beat.guided.meaning.split(/[.!?]+/).filter((part) => part.trim());
         const guidedText = [
+          beat.guided.plainConcept,
           beat.guided.meaning,
+          ...beat.guided.termGlosses.flatMap((entry) => [entry.term, entry.plainMeaning]),
           ...beat.guided.workedStep,
-          beat.guided.microQuestion,
-          beat.guided.microAnswerFrame,
+          beat.guided.guidedTry.question,
+          ...beat.guided.guidedTry.fields,
           beat.guided.warning,
         ].join(' ');
         expect(beat.title.trim()).not.toBe('');
         expect(beat.situation.trim()).not.toBe('');
-        expect(beat.decisionQuestion.trim()).not.toBe('');
-        expect(beat.answerFrame.trim()).not.toBe('');
-        expect(beat.answerFrame.length).toBeLessThanOrEqual(180);
-        expect(beat.answerFrame).not.toContain('\n');
-        expect(answerSlots.length).toBeGreaterThanOrEqual(3);
-        expect(answerSlots.length).toBeLessThanOrEqual(5);
-        expect(answerSlots.every(Boolean)).toBe(true);
+        expect(beat.independentTry.question.trim()).not.toBe('');
+        expect(beat.independentTry.fields.length).toBeGreaterThanOrEqual(3);
+        expect(beat.independentTry.fields.length).toBeLessThanOrEqual(5);
+        expect(beat.independentTry.fields.every((field) => field.trim().length > 0)).toBe(true);
+        expect(new Set(beat.independentTry.fields.map(normalizeStoryText)).size).toBe(beat.independentTry.fields.length);
+        expect(beat.guided.plainConcept.trim()).not.toBe('');
         expect(beat.guided.meaning.trim()).not.toBe('');
         expect(meaningSentences.length).toBeGreaterThanOrEqual(1);
         expect(meaningSentences.length).toBeLessThanOrEqual(2);
+        expect(beat.guided.termGlosses.length).toBeLessThanOrEqual(3);
+        expect(new Set(beat.guided.termGlosses.map((entry) => normalizeStoryText(entry.term))).size).toBe(beat.guided.termGlosses.length);
+        for (const entry of beat.guided.termGlosses) {
+          expect(entry.term.trim()).not.toBe('');
+          expect(entry.plainMeaning.trim()).not.toBe('');
+          expect(normalizeStoryText(entry.plainMeaning)).not.toBe(normalizeStoryText(entry.term));
+        }
         expect(beat.guided.workedStep.length).toBeGreaterThanOrEqual(2);
         expect(beat.guided.workedStep.length).toBeLessThanOrEqual(5);
         expect(beat.guided.workedStep.every((item) => item.trim().length > 0)).toBe(true);
-        expect(beat.guided.microQuestion.trim()).not.toBe('');
-        expect(beat.guided.microAnswerFrame.trim()).not.toBe('');
-        expect(beat.guided.microAnswerFrame).not.toContain('\n');
-        expect(microSlots.length).toBeGreaterThanOrEqual(3);
-        expect(microSlots.length).toBeLessThanOrEqual(5);
-        expect(microSlots.every(Boolean)).toBe(true);
-        expect(normalizeStoryText(beat.guided.microAnswerFrame)).not.toBe(normalizeStoryText(beat.answerFrame));
+        expect(['find-evidence', 'make-decision', 'calculate', 'explain']).toContain(beat.guided.taskKind);
+        expect(beat.guided.guidedTry.question.trim()).not.toBe('');
+        expect(beat.guided.guidedTry.fields.length).toBeGreaterThanOrEqual(1);
+        expect(beat.guided.guidedTry.fields.length).toBeLessThanOrEqual(3);
+        expect(beat.guided.guidedTry.fields.every((field) => field.trim().length > 0)).toBe(true);
+        expect(new Set(beat.guided.guidedTry.fields.map(normalizeStoryText)).size).toBe(beat.guided.guidedTry.fields.length);
+        if (beat.guided.taskKind === 'find-evidence' || beat.guided.taskKind === 'calculate') {
+          expect(beat.guided.evidenceHint?.trim()).not.toBe('');
+        }
         expect(beat.guided.warning.trim()).not.toBe('');
         expect(normalizeStoryText(beat.title)).not.toContain(normalizeStoryText(beat.concept));
-        expect(normalizeStoryText(beat.answerFrame)).not.toContain(normalizeStoryText(beat.concept));
-        expect(beat.answerFrame).not.toMatch(/\b(contoh|misalnya|jawaban (?:final|jadi|benar))\b/i);
+        expect(beat.independentTry.fields.join(' ')).not.toMatch(/\b(contoh|misalnya|jawaban (?:final|jadi|benar))\b/i);
 
         if (week.week <= 8) {
           expect(guidedText).not.toMatch(/\b(InvoiceOps|invoice|ERP|vendor|payment)\b/i);
